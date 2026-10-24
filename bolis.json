@@ -1,0 +1,184 @@
+{
+  "app": "bolis",
+  "version": 3,
+  "items": [
+    {
+      "name": "Mango Chamoy",
+      "qty": 23,
+      "type": "agua"
+    },
+    {
+      "name": "Oreo",
+      "qty": 11,
+      "type": "leche"
+    },
+    {
+      "name": "Capuccino",
+      "qty": 13,
+      "type": "leche"
+    },
+    {
+      "name": "Coco",
+      "qty": 33,
+      "type": "leche"
+    },
+    {
+      "name": "Piña Coco",
+      "qty": 13,
+      "type": "leche"
+    },
+    {
+      "name": "Nutella",
+      "qty": 10,
+      "type": "leche"
+    },
+    {
+      "name": "Emperador Chocolate",
+      "qty": 31,
+      "type": "leche"
+    },
+    {
+      "name": "Mazapán",
+      "qty": 26,
+      "type": "leche"
+    },
+    {
+      "name": "Fresas con Nutella",
+      "qty": 1,
+      "type": "leche"
+    },
+    {
+      "name": "Rompope Durazno",
+      "qty": 0,
+      "type": "leche"
+    },
+    {
+      "name": "Tres Leches",
+      "qty": 0,
+      "type": "leche"
+    },
+    {
+      "name": "M&m's",
+      "qty": 10,
+      "type": "leche"
+    },
+    {
+      "name": "Rompope",
+      "qty": 12,
+      "type": "leche"
+    },
+    {
+      "name": "Emperador Vinilla",
+      "qty": 14,
+      "type": "leche"
+    },
+    {
+      "name": "Fresas Crema",
+      "qty": 32,
+      "type": "leche"
+    },
+    {
+      "name": "Cacahuate",
+      "qty": 28,
+      "type": "leche"
+    },
+    {
+      "name": "Picafresa",
+      "qty": 22,
+      "type": "agua"
+    },
+    {
+      "name": "Pulparindo",
+      "qty": 0,
+      "type": "agua"
+    },
+    {
+      "name": "Maracuya",
+      "qty": 9,
+      "type": "agua"
+    },
+    {
+      "name": "Frutos Rojos",
+      "qty": 4,
+      "type": "agua"
+    },
+    {
+      "name": "Mango",
+      "qty": 5,
+      "type": "agua"
+    },
+    {
+      "name": "Mora Azul",
+      "qty": 0,
+      "type": "agua"
+    },
+    {
+      "name": "Cereza",
+      "qty": 0,
+      "type": "agua"
+    },
+    {
+      "name": "Tamarindo",
+      "qty": 0,
+      "type": "agua"
+    },
+    {
+      "name": "LImón",
+      "qty": 11,
+      "type": "agua"
+    },
+    {
+      "name": "Pay de Limón",
+      "qty": 30,
+      "type": "leche"
+    },
+    {
+      "name": "Chocolate Morelia",
+      "qty": 15,
+      "type": "leche"
+    }
+  ],
+  "prices": {
+    "agua": 0,
+    "leche": 0
+  },
+  "sales": [
+    {
+      "t": "2026-10-19T16:24:14.638Z",
+      "lines": [
+        {
+          "name": "Cereza",
+          "type": "agua",
+          "qty": 3,
+          "price": 0
+        }
+      ],
+      "total": 0
+    },
+    {
+      "t": "2026-10-20T16:23:15.402Z",
+      "lines": [],
+      "extra": 20,
+      "total": 20,
+      "customer": "Master"
+    }
+  ],
+  "pending": [
+    {
+      "id": "mvekf3u2d8ey",
+      "customer": "Estacionamiento",
+      "t": "2026-10-19T01:18:06.122Z",
+      "lines": [],
+      "total": 200,
+      "extra": 200
+    },
+    {
+      "id": "mvekkqlpb25v",
+      "customer": "Casquito",
+      "t": "2026-10-19T01:22:28.909Z",
+      "lines": [],
+      "extra": 120,
+      "total": 120
+    }
+  ]
+}
