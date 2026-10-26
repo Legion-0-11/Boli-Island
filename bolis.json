@@ -1,0 +1,11 @@
+{
+  "app": "bolis",
+  "version": 3,
+  "items": [],
+  "prices": {
+    "agua": 10,
+    "leche": 12
+  },
+  "sales": [],
+  "pending": []
+}
