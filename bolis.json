@@ -180,5 +180,12 @@
       "extra": 120,
       "total": 120
     }
-  ]
+  ],
+  "acceso": {
+    "v": 1,
+    "it": 600000,
+    "salt": "bmYL17ewKLYVdtKAog4FvQ==",
+    "iv": "qPSH8tRbWWdWP58h",
+    "data": "2pvusf6gMkVftVaBM8ko+PGumgAAYJ1WdJzPYNP+d+hoaA85XkZ+OoiRdig06BUI9ZEHnBZmrEHw3WgzfXLykc/4+fbEUOrFNwU3s5n/tKypFVlRCTKYdCSmxf+IYykFcKUBbyEec5MJX4007jME6+64C26X2N2I5qkHT2KdibVE4jNNC7J3ZKTahhlRAw6cApuxSvjrMdmY"
+  }
 }
