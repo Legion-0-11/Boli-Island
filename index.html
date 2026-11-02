@@ -670,21 +670,27 @@ body[data-mode="home"] #nHome,body[data-mode="user"] #nUser,body[data-mode="admi
   .tnav button{font-size:.6rem;letter-spacing:.16em}
 }
 
-/* ---------- Columna de imagen fija (hover = imagen del sabor, reposo = BI.png) ---------- */
+/* ---------- Imagen dinámica: columna derecha (escritorio) / sobre cada boli (teléfono) ---------- */
 :root{--pw:clamp(280px,28vw,460px)}
 #prev{position:fixed;z-index:20;right:0;width:var(--pw);
-  top:calc(var(--hh) + env(safe-area-inset-top,0px));bottom:env(safe-area-inset-bottom,0px);
-  background:#000;pointer-events:none;box-shadow:-20px 0 80px rgba(111,78,55,.35)}
-#prev img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 15%;transition:opacity .35s ease}
+  top:calc(var(--hh) + env(safe-area-inset-top,0px));
+  pointer-events:none;box-shadow:-20px 0 80px rgba(111,78,55,.35);transition:width .35s ease}
+#prev.empty{display:none}
+#prev img{display:block;width:100%;height:auto;transition:opacity .35s ease}
 #prev img.fade{opacity:0}
-.wrap{width:min(1360px,calc(100vw - var(--pw) - 6vw));margin:0 0 0 max(3vw,calc((100vw - var(--pw) - 1360px)/2))}
+.wrap{width:min(1360px,calc(100vw - var(--pw) - 6vw));margin:0 0 0 max(3vw,calc((100vw - var(--pw) - 1360px)/2));
+  transition:width .35s ease,margin-left .35s ease}
 .fab{right:calc(var(--pw) + 20px)}
+.cimgw{display:none}
 @media (max-width:1000px){
   #prev{display:none}
-  .wrap{width:min(1360px,92vw);margin:0 auto}
+  .wrap{width:min(1360px,92vw);margin:0 auto;transition:none}
   .fab{right:20px}
+  .cimgw{display:flex;justify-content:center;order:-1;flex:0 0 100%;grid-column:1/-1;width:100%}
+  .cimgw img{display:block;width:auto;height:auto;max-width:100%;max-height:70vh}
+  ul li.glass{flex-wrap:wrap}
 }
-@media (prefers-reduced-motion: reduce){#prev img{transition:none}}
+@media (prefers-reduced-motion: reduce){#prev,#prev img,.wrap{transition:none}}
 </style>
 </head>
 <body data-mode="home">
@@ -1712,22 +1718,39 @@ body[data-mode="home"] #nHome,body[data-mode="user"] #nUser,body[data-mode="admi
 </script>
 
 <script>
-/* Columna fija: en reposo img/BI.png; al pasar el cursor img/INICIALES.png (ej. "Fresas con crema" -> img/FC.png) */
+/* Imágenes por sabor: img/INICIALES.png (ej. "Fresas con crema" -> img/FC.png), en reposo img/BI.png.
+   Escritorio: columna derecha que se ajusta al tamaño de la imagen. Teléfono: imagen sobre cada boli. */
 (function(){
-  if(!(window.matchMedia && matchMedia("(hover:hover)").matches)) return;
-  var img = document.querySelector("#prev img"), DEF = "img/BI.png", cur = "", tok = 0;
+  var root = document.documentElement, panel = document.getElementById("prev"), img = panel.querySelector("img");
+  var DEF = "img/BI.png", cur = "", tok = 0, nat = null, missing = {};
+  var mq = matchMedia("(max-width:1000px)");
+  var canHover = matchMedia("(hover:hover)").matches;
   var STOP = {con:1, de:1, del:1, y:1, e:1, la:1, el:1, los:1, las:1, en:1, al:1, a:1, sin:1};
   function initials(name){
     var w = String(name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(/[^A-Za-z0-9]+/).filter(Boolean);
     var f = w.filter(function(x){ return !STOP[x.toLowerCase()]; });
     return (f.length ? f : w).map(function(x){ return x.charAt(0); }).join("").toUpperCase();
   }
+
+  /* --- tamaño de la columna según la imagen --- */
+  function fit(){
+    if(!nat || !nat.w){ root.style.setProperty("--pw", "0px"); panel.classList.add("empty"); return; }
+    panel.classList.remove("empty");
+    var bar = document.querySelector(".topbar"), hh = bar ? bar.offsetHeight : 0;
+    var availH = Math.max(200, innerHeight - hh - 8), availW = Math.min(innerWidth * 0.42, 620);
+    var sc = Math.min(availW / nat.w, availH / nat.h, 1);
+    root.style.setProperty("--pw", Math.round(nat.w * sc) + "px");
+  }
   function swap(url, my, fallback){
     var pr = new Image();
     pr.onload = function(){
       if(my !== tok) return;
       img.classList.add("fade");
-      setTimeout(function(){ if(my !== tok) return; img.src = pr.src; img.classList.remove("fade"); }, 180);
+      setTimeout(function(){
+        if(my !== tok) return;
+        img.src = pr.src; nat = {w: pr.naturalWidth, h: pr.naturalHeight}; fit();
+        img.classList.remove("fade");
+      }, 180);
     };
     pr.onerror = function(){ if(my === tok && fallback) swap(fallback, my, ""); };
     pr.src = url;
@@ -1739,15 +1762,45 @@ body[data-mode="home"] #nHome,body[data-mode="user"] #nUser,body[data-mode="admi
     if(ini === cur) return;
     cur = ini; swap("img/" + encodeURIComponent(ini) + ".png", ++tok, DEF);
   }
+
+  /* imagen de reposo inicial */
+  function initDef(){
+    nat = img.naturalWidth ? {w: img.naturalWidth, h: img.naturalHeight} : null; fit();
+  }
+  if(img.complete) initDef();
+  img.addEventListener("load", function(){ if(!cur) initDef(); });
+  img.addEventListener("error", function(){ if(!cur){ nat = null; fit(); } });
+  addEventListener("resize", fit);
+
+  /* --- teléfono: imagen encima de cada boli --- */
+  function decorate(c){
+    Array.prototype.forEach.call(c.querySelectorAll("[data-flavor]"), function(card){
+      var w = card.querySelector(":scope > .cimgw");
+      if(!mq.matches){ if(w) w.remove(); return; }
+      if(w) return;
+      var ini = initials(card.getAttribute("data-flavor"));
+      if(!ini || missing[ini]) return;
+      w = document.createElement("div"); w.className = "cimgw";
+      var im = document.createElement("img"); im.alt = ""; im.loading = "lazy";
+      im.onerror = function(){ missing[ini] = 1; w.remove(); };
+      im.src = "img/" + encodeURIComponent(ini) + ".png";
+      w.appendChild(im); card.insertBefore(w, card.firstChild);
+    });
+  }
+
   ["list", "shopGrid"].forEach(function(id){
     var c = document.getElementById(id);
+    new MutationObserver(function(){ decorate(c); }).observe(c, {childList: true});
+    if(mq.addEventListener) mq.addEventListener("change", function(){ decorate(c); });
+    decorate(c);
+    if(!canHover) return;
     c.addEventListener("mouseover", function(e){
       var card = e.target.closest && e.target.closest("[data-flavor]");
       if(card && c.contains(card)) show(card.getAttribute("data-flavor")); else reset();
     });
     c.addEventListener("mouseleave", reset);
   });
-  new MutationObserver(reset).observe(document.body, {attributes:true, attributeFilter:["data-mode"]});
+  new MutationObserver(reset).observe(document.body, {attributes: true, attributeFilter: ["data-mode"]});
 })();
 </script>
 </body>
