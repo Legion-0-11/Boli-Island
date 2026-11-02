@@ -670,17 +670,21 @@ body[data-mode="home"] #nHome,body[data-mode="user"] #nUser,body[data-mode="admi
   .tnav button{font-size:.6rem;letter-spacing:.16em}
 }
 
-/* ---------- Vista previa del boli (hover) ---------- */
-#prev{position:fixed;z-index:20;right:0;
+/* ---------- Columna de imagen fija (hover = imagen del sabor, reposo = BI.png) ---------- */
+:root{--pw:clamp(280px,28vw,460px)}
+#prev{position:fixed;z-index:20;right:0;width:var(--pw);
   top:calc(var(--hh) + env(safe-area-inset-top,0px));bottom:env(safe-area-inset-bottom,0px);
-  display:flex;align-items:stretch;justify-content:flex-end;pointer-events:none;
-  opacity:0;visibility:hidden;transform:translateX(40px);
-  transition:opacity .45s ease,transform .6s var(--ease),visibility 0s .45s}
-#prev.show{opacity:1;visibility:visible;transform:none;transition:opacity .45s ease,transform .6s var(--ease)}
-#prev img{display:block;height:100%;width:auto;max-width:min(46vw,560px);object-fit:cover;object-position:center top;
-  box-shadow:-20px 0 80px rgba(111,78,55,.35)}
-@media (hover:none){#prev{display:none}}
-@media (prefers-reduced-motion: reduce){#prev,#prev.show{transition:none;transform:none}}
+  background:#000;pointer-events:none;box-shadow:-20px 0 80px rgba(111,78,55,.35)}
+#prev img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 15%;transition:opacity .35s ease}
+#prev img.fade{opacity:0}
+.wrap{width:min(1360px,calc(100vw - var(--pw) - 6vw));margin:0 0 0 max(3vw,calc((100vw - var(--pw) - 1360px)/2))}
+.fab{right:calc(var(--pw) + 20px)}
+@media (max-width:1000px){
+  #prev{display:none}
+  .wrap{width:min(1360px,92vw);margin:0 auto}
+  .fab{right:20px}
+}
+@media (prefers-reduced-motion: reduce){#prev img{transition:none}}
 </style>
 </head>
 <body data-mode="home">
@@ -806,7 +810,7 @@ body[data-mode="home"] #nHome,body[data-mode="user"] #nUser,body[data-mode="admi
   <input id="gatePin" type="password" maxlength="40" autocomplete="off" placeholder="Palabra de acceso"><div id="gateErr"></div>
   <div class="drow"><button type="button" id="gateOk" class="primary">Entrar</button><button type="button" id="gateCancel">Cancelar</button></div></div></div>
 <div id="toast" class="toast" role="status"></div>
-<div id="prev" aria-hidden="true"><img alt=""></div>
+<div id="prev" aria-hidden="true"><img alt="" src="img/BI.png"></div>
 
 <script>
 (function(){
@@ -1708,40 +1712,42 @@ body[data-mode="home"] #nHome,body[data-mode="user"] #nUser,body[data-mode="admi
 </script>
 
 <script>
-/* Vista previa al pasar el cursor: img/INICIALES.png (ej. "Fresas con crema" -> img/FC.png) */
+/* Columna fija: en reposo img/BI.png; al pasar el cursor img/INICIALES.png (ej. "Fresas con crema" -> img/FC.png) */
 (function(){
   if(!(window.matchMedia && matchMedia("(hover:hover)").matches)) return;
-  var box = document.getElementById("prev"), img = box.querySelector("img"), cur = "", tok = 0;
+  var img = document.querySelector("#prev img"), DEF = "img/BI.png", cur = "", tok = 0;
   var STOP = {con:1, de:1, del:1, y:1, e:1, la:1, el:1, los:1, las:1, en:1, al:1, a:1, sin:1};
   function initials(name){
     var w = String(name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(/[^A-Za-z0-9]+/).filter(Boolean);
     var f = w.filter(function(x){ return !STOP[x.toLowerCase()]; });
     return (f.length ? f : w).map(function(x){ return x.charAt(0); }).join("").toUpperCase();
   }
-  function hide(){ tok++; cur = ""; box.classList.remove("show"); }
+  function swap(url, my, fallback){
+    var pr = new Image();
+    pr.onload = function(){
+      if(my !== tok) return;
+      img.classList.add("fade");
+      setTimeout(function(){ if(my !== tok) return; img.src = pr.src; img.classList.remove("fade"); }, 180);
+    };
+    pr.onerror = function(){ if(my === tok && fallback) swap(fallback, my, ""); };
+    pr.src = url;
+  }
+  function reset(){ if(!cur) return; cur = ""; swap(DEF, ++tok, ""); }
   function show(name){
     var ini = initials(name);
-    if(!ini){ hide(); return; }
+    if(!ini){ reset(); return; }
     if(ini === cur) return;
-    cur = ini; var my = ++tok;
-    var probe = new Image();
-    probe.onload = function(){
-      if(my !== tok) return;
-      img.src = probe.src; box.classList.add("show");
-    };
-    probe.onerror = function(){ if(my === tok){ box.classList.remove("show"); } };
-    probe.src = "img/" + encodeURIComponent(ini) + ".png";
+    cur = ini; swap("img/" + encodeURIComponent(ini) + ".png", ++tok, DEF);
   }
   ["list", "shopGrid"].forEach(function(id){
     var c = document.getElementById(id);
     c.addEventListener("mouseover", function(e){
       var card = e.target.closest && e.target.closest("[data-flavor]");
-      if(card && c.contains(card)) show(card.getAttribute("data-flavor")); else hide();
+      if(card && c.contains(card)) show(card.getAttribute("data-flavor")); else reset();
     });
-    c.addEventListener("mouseleave", hide);
+    c.addEventListener("mouseleave", reset);
   });
-  new MutationObserver(function(){ if(document.body.getAttribute("data-mode") === "home") hide(); })
-    .observe(document.body, {attributes:true, attributeFilter:["data-mode"]});
+  new MutationObserver(reset).observe(document.body, {attributes:true, attributeFilter:["data-mode"]});
 })();
 </script>
 </body>
