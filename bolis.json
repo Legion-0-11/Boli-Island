@@ -131,6 +131,11 @@
       "name": "Chocolate Morelia",
       "qty": 31,
       "type": "leche"
+    },
+    {
+      "name": "Emperador Vainilla",
+      "qty": 12,
+      "type": "leche"
     }
   ],
   "prices": {
