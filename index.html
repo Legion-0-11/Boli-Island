@@ -669,6 +669,18 @@ body[data-mode="home"] #nHome,body[data-mode="user"] #nUser,body[data-mode="admi
   .tnav{gap:14px}
   .tnav button{font-size:.6rem;letter-spacing:.16em}
 }
+
+/* ---------- Vista previa del boli (hover) ---------- */
+#prev{position:fixed;z-index:20;right:0;
+  top:calc(var(--hh) + env(safe-area-inset-top,0px));bottom:env(safe-area-inset-bottom,0px);
+  display:flex;align-items:stretch;justify-content:flex-end;pointer-events:none;
+  opacity:0;visibility:hidden;transform:translateX(40px);
+  transition:opacity .45s ease,transform .6s var(--ease),visibility 0s .45s}
+#prev.show{opacity:1;visibility:visible;transform:none;transition:opacity .45s ease,transform .6s var(--ease)}
+#prev img{display:block;height:100%;width:auto;max-width:min(46vw,560px);object-fit:cover;object-position:center top;
+  box-shadow:-20px 0 80px rgba(111,78,55,.35)}
+@media (hover:none){#prev{display:none}}
+@media (prefers-reduced-motion: reduce){#prev,#prev.show{transition:none;transform:none}}
 </style>
 </head>
 <body data-mode="home">
@@ -794,6 +806,7 @@ body[data-mode="home"] #nHome,body[data-mode="user"] #nUser,body[data-mode="admi
   <input id="gatePin" type="password" maxlength="40" autocomplete="off" placeholder="Palabra de acceso"><div id="gateErr"></div>
   <div class="drow"><button type="button" id="gateOk" class="primary">Entrar</button><button type="button" id="gateCancel">Cancelar</button></div></div></div>
 <div id="toast" class="toast" role="status"></div>
+<div id="prev" aria-hidden="true"><img alt=""></div>
 
 <script>
 (function(){
@@ -967,7 +980,7 @@ body[data-mode="home"] #nHome,body[data-mode="user"] #nUser,body[data-mode="admi
       if((stockSel["s-ok"] || stockSel["s-mid"] || stockSel["s-low"]) && !stockSel[it.qty > 10 ? "s-ok" : it.qty >= 6 ? "s-mid" : "s-low"]) return;
       shown++;
       var li = document.createElement("li");
-      li.className = "glass t-" + it.type; var lvl = it.qty > 10 ? "s-ok" : it.qty >= 6 ? "s-mid" : "s-low";
+      li.className = "glass t-" + it.type; li.setAttribute("data-flavor", it.name); var lvl = it.qty > 10 ? "s-ok" : it.qty >= 6 ? "s-mid" : "s-low";
 
       var bar = document.createElement("button"); bar.type = "button"; bar.className = "tbar " + it.type;
       bar.title = "Boli de " + it.type + " (clic para cambiar)";
@@ -1229,7 +1242,7 @@ body[data-mode="home"] #nHome,body[data-mode="user"] #nUser,body[data-mode="admi
       if(q && it.name.toLowerCase().indexOf(q) === -1) return;
       shown++;
       var k = key(it), n = cart[k] || 0, out = it.qty <= 0, price = prices[it.type] || 0;
-      var card = el("div", "pcard t-" + it.type + (out ? " out" : ""));
+      var card = el("div", "pcard t-" + it.type + (out ? " out" : "")); card.setAttribute("data-flavor", it.name);
       var info = el("div", "pinfo");
       info.appendChild(el("span", "pname", it.name));
       info.appendChild(el("span", "psub", (it.type === "leche" ? "Boli de leche" : "Boli de agua") + " · " + money(price)));
@@ -1691,6 +1704,44 @@ body[data-mode="home"] #nHome,body[data-mode="user"] #nUser,body[data-mode="admi
   addEventListener("resize",function(){clearTimeout(rt);rt=setTimeout(function(){init();if(still)draw();},200);});
   document.addEventListener("visibilitychange",function(){if(!document.hidden&&!still)start();});
   init(); if(still) draw(); else start();
+})();
+</script>
+
+<script>
+/* Vista previa al pasar el cursor: img/INICIALES.png (ej. "Fresas con crema" -> img/FC.png) */
+(function(){
+  if(!(window.matchMedia && matchMedia("(hover:hover)").matches)) return;
+  var box = document.getElementById("prev"), img = box.querySelector("img"), cur = "", tok = 0;
+  var STOP = {con:1, de:1, del:1, y:1, e:1, la:1, el:1, los:1, las:1, en:1, al:1, a:1, sin:1};
+  function initials(name){
+    var w = String(name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").split(/[^A-Za-z0-9]+/).filter(Boolean);
+    var f = w.filter(function(x){ return !STOP[x.toLowerCase()]; });
+    return (f.length ? f : w).map(function(x){ return x.charAt(0); }).join("").toUpperCase();
+  }
+  function hide(){ tok++; cur = ""; box.classList.remove("show"); }
+  function show(name){
+    var ini = initials(name);
+    if(!ini){ hide(); return; }
+    if(ini === cur) return;
+    cur = ini; var my = ++tok;
+    var probe = new Image();
+    probe.onload = function(){
+      if(my !== tok) return;
+      img.src = probe.src; box.classList.add("show");
+    };
+    probe.onerror = function(){ if(my === tok){ box.classList.remove("show"); } };
+    probe.src = "img/" + encodeURIComponent(ini) + ".png";
+  }
+  ["list", "shopGrid"].forEach(function(id){
+    var c = document.getElementById(id);
+    c.addEventListener("mouseover", function(e){
+      var card = e.target.closest && e.target.closest("[data-flavor]");
+      if(card && c.contains(card)) show(card.getAttribute("data-flavor")); else hide();
+    });
+    c.addEventListener("mouseleave", hide);
+  });
+  new MutationObserver(function(){ if(document.body.getAttribute("data-mode") === "home") hide(); })
+    .observe(document.body, {attributes:true, attributeFilter:["data-mode"]});
 })();
 </script>
 </body>
