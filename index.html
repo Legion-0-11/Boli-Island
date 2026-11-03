@@ -1076,6 +1076,56 @@ ul li.glass:not(.empty),.pcard{margin-right:26px}
   .pcard .pside{border-left:0;border-top:1px solid rgba(232,207,159,.14);padding:16px 0 0;min-width:0}
   #shopGrid,#list{row-gap:34px !important}
 }
+
+/* ================= Tercera sección: Promociones (sin foto fija) ================= */
+:root{--pw:0px}
+#prev,.cimgw{display:none !important}
+.only-promo{display:none !important}
+body[data-mode="promo"] .only-promo{display:block !important}
+body[data-mode="promo"] .only-home,body[data-mode="promo"] .only-admin,body[data-mode="promo"] .only-user,body[data-mode="promo"] .only-shakes{display:none !important}
+body[data-mode="promo"] .fab,body[data-mode="promo"] .drawer{display:none !important}
+body[data-mode="shakes"] .only-promo,body[data-mode="user"] .only-promo,body[data-mode="admin"] .only-promo,body[data-mode="home"] .only-promo{display:none !important}
+body[data-mode="promo"] #nPromo{color:#f4ecdb;border-bottom-color:#a67c5b !important}
+
+/* Inicio: tres tarjetas verticales */
+.home{grid-template-columns:repeat(3,minmax(0,320px)) !important;gap:30px !important}
+.door-promo:hover{border-color:#8a7e5a}
+.entering .door-promo{animation-delay:.46s}
+@media (max-width:1000px){.home{grid-template-columns:minmax(0,340px) !important}}
+
+/* Sección de promociones */
+.promo{max-width:1200px;margin:6px auto 0}
+.promo .shk{text-align:center;font-family:var(--serif);font-size:2rem;letter-spacing:.28em;text-transform:uppercase;color:#f4ecdb;margin:6px 0 34px}
+.promogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:34px;justify-items:center}
+.promogrid .cempty{grid-column:1/-1}
+.pmcard{position:relative;width:100%;max-width:300px;aspect-ratio:3/4.4;overflow:hidden;border-radius:16px !important;background:#080706;
+  border-bottom:1px solid #a67c5b;transition:transform .9s var(--ease)}
+.pmcard:hover{transform:translateY(-6px)}
+.pmcard img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.4s var(--ease)}
+.pmcard:hover img{transform:scale(1.05)}
+.pmcard .pmshade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(5,4,3,.55) 72%,rgba(5,4,3,.92) 100%)}
+.pmcard .pmtxt{position:absolute;left:0;right:0;bottom:0;padding:22px 22px 24px;display:flex;flex-direction:column;gap:6px;text-align:left}
+.pmcard .pmtag{font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:#d9bf86}
+.pmcard .pmname{font-family:var(--serif);font-size:1.6rem;font-weight:500;color:#f8f0dd;line-height:1.1}
+.pmcard .pmsub{font-size:.78rem;letter-spacing:.08em;color:#cdbca4}
+
+/* Portada de Promociones: img/new.png, sin texto encima */
+.pmcard.pmcover{background:#000}
+.pmcard.pmcover img{object-fit:cover}
+@media (min-width:760px){.pmcard.pmcover{grid-row:span 1}}
+
+/* ---------- Portada de la sección Promociones: img/new.png ---------- */
+.door-promo.has-cover{
+  background-image:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(5,4,3,.55) 66%,rgba(5,4,3,.94) 100%),var(--cover) !important;
+  background-size:cover !important;background-position:center !important;background-repeat:no-repeat !important;
+  justify-content:flex-end}
+.door-promo.has-cover .di{display:none}
+.door-promo.has-cover b{margin-top:0;text-shadow:0 2px 14px rgba(0,0,0,.7)}
+.door-promo.has-cover .dsub{color:#e4d6bd;text-shadow:0 1px 10px rgba(0,0,0,.7)}
+.door-promo.has-cover .dgo{margin-top:12px}
+.pmbanner{max-width:1000px;margin:0 auto 46px;border-radius:16px !important;overflow:hidden;border-bottom:1px solid #a67c5b;background:#000}
+.pmbanner[hidden]{display:none}
+.pmbanner img{display:block;width:100%;height:auto;max-height:540px;object-fit:cover}
 </style>
 </head>
 <body data-mode="home">
@@ -1087,6 +1137,7 @@ ul li.glass:not(.empty),.pcard{margin-right:26px}
     <button type="button" id="nHome">Inicio</button>
     <button type="button" id="nUser">Bolis</button>
     <button type="button" id="nShakes">Malteadas</button>
+    <button type="button" id="nPromo">Promociones</button>
     <button type="button" id="nAdmin">Administrador</button>
   </nav>
 </header>
@@ -1101,6 +1152,7 @@ ul li.glass:not(.empty),.pcard{margin-right:26px}
   <section class="home only-home">
     <button type="button" class="door door-user" id="goUser"><span class="di"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="dgu" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1e6cc"/><stop offset=".55" stop-color="#c9a27a"/><stop offset="1" stop-color="#8a6244"/></linearGradient></defs><g transform="rotate(-14 32 32)" fill="none" stroke="url(#dgu)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 22a12 12 0 0 1 24 0v15a4 4 0 0 1-4 4H24a4 4 0 0 1-4-4z" fill="rgba(166,124,91,.16)"/><path d="M20 26q6 3.5 12 0t12 0" opacity=".75"/><path d="M20 33q6 3.5 12 0t12 0" opacity=".5"/><path d="M27 15.5q2-3 5.5-3.3" stroke-width="1.8" opacity=".9"/><rect x="29" y="41" width="6" height="14" rx="3" fill="rgba(232,217,181,.14)"/></g><g fill="url(#dgu)"><path d="M51 9l1.6 4.4L57 15l-4.4 1.6L51 21l-1.6-4.4L45 15l4.4-1.6z" class="spk"/><circle cx="12" cy="46" r="1.6" class="spk2"/></g></svg></span><b>Bolis</b><span class="dsub">Agua y leche, en todos los sabores</span><span class="dgo">Ver sabores</span></button>
     <button type="button" class="door door-shakes" id="goShakes"><span class="di"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="dgm" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1e6cc"/><stop offset=".55" stop-color="#c9a27a"/><stop offset="1" stop-color="#8a6244"/></linearGradient></defs><g fill="none" stroke="url(#dgm)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 24h32l-4 28a4 4 0 0 1-4 3.5H24a4 4 0 0 1-4-3.5z" fill="rgba(166,124,91,.16)"/><path d="M18 32h28" opacity=".6"/><path d="M14 24h36"/><path d="M20 24c0-6 5-9 12-9s12 3 12 9" fill="rgba(232,217,181,.14)"/><path d="M27 15c1-3 3-5 5-5s4 2 5 5" opacity=".8"/><path d="M38 15l7-9" /><path d="M28 40q4 3 8 0" opacity=".7"/></g><g fill="url(#dgm)"><path class="spk" d="M52 14l1.5 4L57.5 19.5 53.5 21 52 25l-1.5-4L46.5 19.5 50.5 18z"/><circle class="spk2" cx="11" cy="48" r="1.6"/></g></svg></span><b>Malteadas</b><span class="dsub">Cremosas, frías y hechas al momento</span><span class="dgo">Ver malteadas</span></button>
+    <button type="button" class="door door-promo" id="goPromo"><span class="di"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="dgp" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1e6cc"/><stop offset=".55" stop-color="#c9a27a"/><stop offset="1" stop-color="#8a6244"/></linearGradient></defs><g fill="none" stroke="url(#dgp)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 32L32 10h19a3 3 0 0 1 3 3v19L32 54a3 3 0 0 1-4.2 0L10 36.2a3 3 0 0 1 0-4.2z" fill="rgba(166,124,91,.16)"/><circle cx="44" cy="20" r="3.2"/><path d="M24 38l12-12" opacity=".9"/><circle cx="25.5" cy="27.5" r="2.2"/><circle cx="34.5" cy="36.5" r="2.2"/></g><g fill="url(#dgp)"><path class="spk" d="M52 40l1.4 3.8L57.2 45.2 53.4 46.6 52 50.4l-1.4-3.8L46.8 45.2l3.8-1.4z"/><circle class="spk2" cx="10" cy="14" r="1.6"/></g></svg></span><b>Promociones</b><span class="dsub">Ofertas y sabores para presumir</span><span class="dgo">Ver promos</span></button>
   </section>
 
   <nav class="topnav only-nav"><button type="button" id="bHome" class="circ" title="Inicio" aria-label="Inicio">⌂</button><span id="syncChip" class="sync only-admin"></span></nav>
@@ -1117,6 +1169,12 @@ ul li.glass:not(.empty),.pcard{margin-right:26px}
   <section class="shakes only-shakes">
     <p class="shk">Malteadas</p>
     <div id="shakeGrid" class="shakegrid"></div>
+  </section>
+
+  <section class="promo only-promo">
+    <p class="shk">Promociones</p>
+    <div class="pmbanner" id="promoCover" hidden><img alt="Promociones Boli Island" src="img/new.png"></div>
+    <div id="promoGrid" class="promogrid"></div>
   </section>
 
   <div id="viewAdmin" class="only-admin">
@@ -1207,7 +1265,6 @@ ul li.glass:not(.empty),.pcard{margin-right:26px}
   <input id="gatePin" type="password" maxlength="40" autocomplete="off" placeholder="Palabra de acceso"><div id="gateErr"></div>
   <div class="drow"><button type="button" id="gateOk" class="primary circ" title="Entrar" aria-label="Entrar">→</button><button type="button" id="gateCancel" class="circ" title="Cancelar" aria-label="Cancelar">✕</button></div></div></div>
 <div id="toast" class="toast" role="status"></div>
-<div id="prev" aria-hidden="true"><img alt="" src="img/BI.png"></div>
 
 <footer class="sitefoot"><img class="fsym" alt="Boli Island" src="data:image/png;base64,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"></footer>
 
@@ -1592,7 +1649,7 @@ ul li.glass:not(.empty),.pcard{margin-right:26px}
     
     $("bPay").textContent = m === "user" ? "Confirmar compra" : "Cobrar venta";
     setDrawer(false);
-    render(); if(m === "shakes") renderShakes();
+    render(); if(m === "shakes") renderShakes(); if(m === "promo") renderPromos();
     window.scrollTo(0, 0);
     document.body.classList.add("entering"); clearTimeout(entT);
     entT = setTimeout(function(){ document.body.classList.remove("entering"); }, 1600);
@@ -1689,6 +1746,40 @@ ul li.glass:not(.empty),.pcard{margin-right:26px}
     {name: "Cajeta", desc: "Caramelo de cabra, dulce y profundo", price: 50},
     {name: "Mazapán", desc: "Cacahuate dulce, al estilo mexicano", price: 50}
   ];
+
+  /* ---------- Promociones: tarjetas verticales con la foto de cada sabor ---------- */
+  var PROMO_TAG = "Sabor destacado";   /* texto de la etiqueta; cámbialo cuando haya una promoción real */
+  function renderPromos(){
+    var g = $("promoGrid"); if(!g) return;
+    g.innerHTML = "";
+    var list = [];
+    (items || []).forEach(function(it){
+      if(!it || it.qty <= 0 || list.length >= 9) return;
+      var u = window.flavorImgUrl ? window.flavorImgUrl(it.name) : "";
+      if(u) list.push({name: it.name, sub: money(prices[it.type] || 0) + " · Boli de " + (it.type === "leche" ? "leche" : "agua"), tag: PROMO_TAG, url: u});
+    });
+    var alive = list.length;
+    if(!alive){ g.appendChild(el("div", "cempty", "Muy pronto: nuevas promociones.")); }
+    list.forEach(function(p){
+      var c = el("div", "pmcard"), im = document.createElement("img");
+      im.alt = p.name; im.loading = "lazy";
+      im.onerror = function(){ c.remove(); alive--; if(alive <= 0) g.appendChild(el("div", "cempty", "Muy pronto: nuevas promociones.")); };
+      im.src = p.url;
+      var tx = el("div", "pmtxt"); tx.append(el("span", "pmtag", p.tag), el("h3", "pmname", p.name), el("span", "pmsub", p.sub));
+      c.append(im, el("span", "pmshade"), tx);
+      g.appendChild(c);
+    });
+  }
+  window.addEventListener("bolis:imgs", function(){ if(mode === "promo") renderPromos(); });
+  /* Portada de la sección: img/new.png (tarjeta del inicio y banner dentro de Promociones) */
+  (function(){
+    var COVER = "img/new.png", door = $("goPromo"), ban = $("promoCover"), bi = ban.querySelector("img");
+    var t = new Image();
+    t.onload = function(){ door.style.setProperty("--cover", 'url("' + COVER + '")'); door.classList.add("has-cover"); ban.hidden = false; };
+    t.onerror = function(){ ban.hidden = true; };
+    t.src = COVER;
+    bi.onerror = function(){ ban.hidden = true; };
+  })();
   function renderShakes(){
     var g = $("shakeGrid"); if(!g) return;
     g.innerHTML = "";
@@ -1700,12 +1791,14 @@ ul li.glass:not(.empty),.pcard{margin-right:26px}
   }
   $("goUser").onclick = function(){ setMode("user"); };
   $("goShakes").onclick = function(){ setMode("shakes"); };
+  $("goPromo").onclick = function(){ setMode("promo"); };
   function goAdmin(){ if(mode !== "admin") openGate(); }
   $("nAdmin").onclick = goAdmin;
   $("nHome").onclick = function(){ if(mode !== "home") setMode("home"); };
   $("nBrand").onclick = function(){ if(mode !== "home") setMode("home"); };
   $("nUser").onclick = function(){ if(mode !== "user") setMode("user"); };
   $("nShakes").onclick = function(){ if(mode !== "shakes") setMode("shakes"); };
+  $("nPromo").onclick = function(){ if(mode !== "promo") setMode("promo"); };
   $("bHome").onclick = function(){ setMode("home"); };
   $("gateOk").onclick = tryGate;
   $("gateCancel").onclick = closeGate;
@@ -2139,27 +2232,18 @@ ul li.glass:not(.empty),.pcard{margin-right:26px}
 </script>
 
 <script>
-/* Imágenes por sabor: el nombre completo del sabor, sin importar mayúsculas, espacios ni acentos.
-   "Fresas Nutella" -> img/fresasnutella.png (también acepta FresasNutella.png, Fresas Nutella.png, etc.).
-   En reposo: img/BI.png. Escritorio: columna derecha que se ajusta a la imagen. Teléfono: imagen sobre cada boli. */
+/* Imágenes por sabor: sólo para la sección de Promociones.
+   "Fresas Nutella" -> img/fresasnutella.png (acepta mayúsculas, espacios y acentos distintos). */
 (function(){
-  var root = document.documentElement, panel = document.getElementById("prev"), img = panel.querySelector("img");
-  var DEF = "img/BI.png", cur = "", tok = 0, nat = null, missing = {}, files = null;
-  var mq = matchMedia("(max-width:1000px)");
-  var canHover = matchMedia("(hover:hover)").matches;
-  var IDX_KEY = "bolis:imgidx:v1";
-
+  var files = null, IDX_KEY = "bolis:imgidx:v1";
   function keyOf(name){
     return String(name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
   }
-  /* url de la imagen de un sabor ("" si se sabe que no existe) */
   function fileUrl(name){
     var k = keyOf(name); if(!k) return "";
     if(files){ return files[k] ? "img/" + encodeURIComponent(files[k]) : ""; }
     return "img/" + encodeURIComponent(k + ".png");
   }
-
-  /* --- lista de archivos de img/ (para que no importen mayúsculas ni espacios en GitHub Pages) --- */
   function buildMap(list){
     var m = {};
     list.forEach(function(f){
@@ -2178,81 +2262,12 @@ ul li.glass:not(.empty),.pcard{margin-right:26px}
     fetch("https://api.github.com/repos/" + h[1] + "/" + repo + "/contents/img?ref=main", {headers: {"Accept": "application/vnd.github+json"}})
       .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
       .then(function(list){
-        files = buildMap(list); missing = {};
+        files = buildMap(list);
         try{ localStorage.setItem(IDX_KEY, JSON.stringify({t: Date.now(), map: files})); }catch(e){}
-        ["list", "shopGrid"].forEach(function(id){ decorate(document.getElementById(id)); });
+        window.dispatchEvent(new Event("bolis:imgs"));
       }).catch(function(){});
   }
-
-  /* --- tamaño de la columna según la imagen --- */
-  function fit(){
-    if(!nat || !nat.w){ root.style.setProperty("--pw", "0px"); panel.classList.add("empty"); return; }
-    panel.classList.remove("empty");
-    var bar = document.querySelector(".topbar"), hh = bar ? bar.offsetHeight : 0;
-    var availH = Math.max(200, innerHeight - hh - 8), availW = Math.min(innerWidth * 0.42, 620);
-    var sc = Math.min(availW / nat.w, availH / nat.h, 1);
-    root.style.setProperty("--pw", Math.round(nat.w * sc) + "px");
-  }
-  function swap(url, my, fallback){
-    var pr = new Image();
-    pr.onload = function(){
-      if(my !== tok) return;
-      img.classList.add("fade");
-      setTimeout(function(){
-        if(my !== tok) return;
-        img.src = pr.src; nat = {w: pr.naturalWidth, h: pr.naturalHeight}; fit();
-        img.classList.remove("fade");
-      }, 180);
-    };
-    pr.onerror = function(){ if(my === tok && fallback) swap(fallback, my, ""); };
-    pr.src = url;
-  }
-  function reset(){ if(!cur) return; cur = ""; swap(DEF, ++tok, ""); }
-  function show(name){
-    var k = keyOf(name), url = fileUrl(name);
-    if(!k || !url){ reset(); return; }
-    if(k === cur) return;
-    cur = k; swap(url, ++tok, DEF);
-  }
-
-  /* imagen de reposo inicial */
-  function initDef(){
-    nat = img.naturalWidth ? {w: img.naturalWidth, h: img.naturalHeight} : null; fit();
-  }
-  if(img.complete) initDef();
-  img.addEventListener("load", function(){ if(!cur) initDef(); });
-  img.addEventListener("error", function(){ if(!cur){ nat = null; fit(); } });
-  addEventListener("resize", fit);
-
-  /* --- teléfono: imagen encima de cada boli --- */
-  function decorate(c){
-    Array.prototype.forEach.call(c.querySelectorAll("[data-flavor]"), function(card){
-      var w = card.querySelector(":scope > .cimgw");
-      if(!mq.matches){ if(w) w.remove(); return; }
-      var name = card.getAttribute("data-flavor"), k = keyOf(name), url = fileUrl(name);
-      if(w && !url){ w.remove(); return; }
-      if(w || !k || !url || missing[k]) return;
-      w = document.createElement("div"); w.className = "cimgw";
-      var im = document.createElement("img"); im.alt = ""; im.loading = "lazy";
-      im.onerror = function(){ missing[k] = 1; w.remove(); };
-      im.src = url;
-      w.appendChild(im); card.insertBefore(w, card.firstChild);
-    });
-  }
-
-  ["list", "shopGrid"].forEach(function(id){
-    var c = document.getElementById(id);
-    new MutationObserver(function(){ decorate(c); }).observe(c, {childList: true});
-    if(mq.addEventListener) mq.addEventListener("change", function(){ decorate(c); });
-    decorate(c);
-    if(!canHover) return;
-    c.addEventListener("mouseover", function(e){
-      var card = e.target.closest && e.target.closest("[data-flavor]");
-      if(card && c.contains(card)) show(card.getAttribute("data-flavor")); else reset();
-    });
-    c.addEventListener("mouseleave", reset);
-  });
-  new MutationObserver(reset).observe(document.body, {attributes: true, attributeFilter: ["data-mode"]});
+  window.flavorImgUrl = fileUrl;
   loadIndex();
 })();
 </script>
