@@ -1182,6 +1182,82 @@ body[data-mode="promo"] #nPromo{color:#f4ecdb;border-bottom-color:#a67c5b !impor
   .pcard .pinfo{column-gap:18px}
   .pcard .pside{min-width:0;padding:18px 0 0;border-left:0;border-top:1px solid rgba(232,207,159,.10)}
 }
+
+/* ================= Administrador: interfaz mejorada ================= */
+.layout{grid-template-columns:minmax(320px,400px) minmax(0,1fr);gap:56px !important;align-items:start}
+.side{gap:28px !important}
+
+/* Paneles laterales: mismo lenguaje que las tarjetas (sin brillo, línea cobre inferior) */
+.side .glass{border-radius:22px !important;box-shadow:none !important;border:0 solid transparent !important;
+  border-bottom:1px solid #a67c5b !important;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0) 40%),#070606 !important}
+.ptitle{letter-spacing:.3em;color:#d9bf86}
+
+/* Resumen */
+.stats{display:grid !important;grid-template-columns:1fr 1fr;gap:20px !important}
+.stat{padding:26px 26px 22px !important;text-align:left}
+.stat b{font-size:2.8rem !important;color:#f8f0dd;background:linear-gradient(180deg,#f3dfb2,#c9a06a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.stat span{display:block;margin-top:6px;color:#b7a68f}
+
+/* Archivo y sincronización plegables */
+.filebar{padding:24px 26px !important}
+.syncd{margin-top:14px;border-top:1px solid rgba(232,207,159,.12);padding-top:14px}
+.syncd summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;
+  font-size:.66rem;letter-spacing:.28em;text-transform:uppercase;color:#d9bf86;padding:4px 0;transition:color .4s ease}
+.syncd summary::-webkit-details-marker{display:none}
+.syncd summary::after{content:"+";font-size:1.1rem;letter-spacing:0;transition:transform .5s var(--ease)}
+.syncd[open] summary::after{transform:rotate(45deg)}
+.syncd summary:hover{color:#f4ecdb}
+.syncd[open] .row{margin-top:16px}
+
+/* Formulario de nuevo sabor */
+.add{padding:26px !important;display:grid !important;grid-template-columns:minmax(0,1fr) 92px 46px;gap:14px !important;align-items:center}
+.add .ptitle{grid-column:1/-1;margin:0 0 4px}
+.add #name{grid-column:1/-1}
+.add select,.add #qty{width:100%}
+.add #addBtn{justify-self:end}
+.add #type{grid-column:1/2}
+
+/* Campos del panel: línea cobre y forma de píldora */
+.add input,.add select,.pform input,.ghbox input,.recv input,.prices input{
+  border:0 !important;border-bottom:1px solid #6b5239 !important;border-radius:999px !important;
+  background:rgba(255,255,255,.04) !important;padding:13px 20px !important;color:#f4ecdb;transition:border-color .5s ease,background .5s ease}
+.add input:focus,.add select:focus,.pform input:focus,.ghbox input:focus{border-bottom-color:#e3cfa8 !important;background:rgba(255,255,255,.07) !important;outline:none}
+
+/* Pendientes de pago */
+.pendbox{padding:26px !important}
+.pbh{margin-bottom:16px !important;padding-bottom:14px;border-bottom:1px solid rgba(232,207,159,.12)}
+#pendTotal{color:#e8cf9f;font-family:var(--serif);font-size:1.5rem}
+.pform{gap:12px !important}
+
+/* Zona principal */
+.mainhead{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin:0 0 26px}
+.mainhead h2{margin:0;font-family:var(--serif);font-size:2rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:#f4ecdb}
+.mainhead span{font-size:.78rem;letter-spacing:.14em;color:#8f8173}
+.filters{margin:0 0 36px !important;gap:16px 26px !important}
+.filters .hint{color:#8f8173}
+
+/* Lista del administrador: una fila ordenada por sabor */
+#list{grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr)) !important;column-gap:44px !important;row-gap:48px !important}
+#list li.glass:not(.empty){display:grid;grid-template-columns:auto minmax(0,1fr) auto auto auto;align-items:center;
+  column-gap:22px;min-height:150px;padding:34px 36px 34px clamp(44px,4vw,60px) !important;border-radius:68px 26px 26px 68px !important}
+#list li.glass .bars{display:flex;gap:8px;align-items:center}
+#list li.glass .fname{font-size:1.6rem;line-height:1.12;min-width:0;overflow-wrap:anywhere}
+#list li.glass .ctrl{margin:0;gap:8px;padding:0 6px}
+#list li.glass .ctrl input{width:62px;text-align:center}
+#list li.glass .cartbtn,#list li.glass .del{margin:0}
+
+/* Pie de la lista */
+.foot{margin-top:56px !important;padding-top:20px;border-top:1px solid rgba(232,207,159,.12)}
+
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr) !important;gap:40px !important}}
+@media (max-width:700px){
+  #list{row-gap:38px !important}
+  #list li.glass:not(.empty){grid-template-columns:auto minmax(0,1fr) auto;row-gap:16px;padding:30px 26px 28px 40px !important;border-radius:48px 22px 22px 48px !important}
+  #list li.glass .ctrl{grid-column:1/-1;justify-self:start;padding:0}
+  #list li.glass .cartbtn{grid-column:2;justify-self:end}
+  #list li.glass .del{grid-column:3}
+  .add{grid-template-columns:minmax(0,1fr) 84px 46px !important}
+}
 </style>
 </head>
 <body data-mode="home">
@@ -1244,6 +1320,7 @@ body[data-mode="promo"] #nPromo{color:#f4ecdb;border-bottom-color:#a67c5b !impor
 
   <div class="glass filebar">
     <div id="fstatus">Sin archivo vinculado: los datos solo están en el navegador.</div>
+    <details class="syncd"><summary>Archivo y sincronización</summary>
     <div class="row">
       <button type="button" id="bCreate" class="primary">Crear archivo en el escritorio</button>
       <button type="button" id="bOpen">Abrir archivo existente</button>
@@ -1262,9 +1339,11 @@ body[data-mode="promo"] #nPromo{color:#f4ecdb;border-bottom-color:#a67c5b !impor
       <div class="row"><button type="button" id="ghPublish" class="primary">Publicar acceso</button><button type="button" id="ghRevoke">Quitar acceso</button></div>
       <div id="ghStatus">Sin conexión a GitHub.</div>
     </div>
+    </details>
   </div>
 
   <form class="glass add" id="form" onsubmit="return false">
+    <p class="ptitle">Nuevo sabor</p>
     <input id="name" placeholder="Sabor (ej. Mango con chile)" maxlength="40" autocomplete="off">
     <select id="type" aria-label="Tipo de boli"><option value="agua">Agua</option><option value="leche">Leche</option></select>
     <input id="qty" type="number" min="0" value="10" inputmode="numeric" aria-label="Cantidad">
@@ -1278,6 +1357,7 @@ body[data-mode="promo"] #nPromo{color:#f4ecdb;border-bottom-color:#a67c5b !impor
   </section>
 </aside>
 <section class="main">
+  <div class="mainhead"><h2>Inventario</h2><span>Agrega, ajusta y vende desde aquí</span></div>
   <input id="search" placeholder="Buscar sabor…" autocomplete="off">
   <div class="filters">
     <div class="chips" id="fType" aria-label="Filtrar por categoría">
