@@ -1258,6 +1258,44 @@ body[data-mode="promo"] #nPromo{color:#f4ecdb;border-bottom-color:#a67c5b !impor
   #list li.glass .del{grid-column:3}
   .add{grid-template-columns:minmax(0,1fr) 84px 46px !important}
 }
+
+/* ---------- Sin bordes dorados en tarjetas, paneles y portadas ---------- */
+.pcard,.pcard.t-agua,.pcard.t-leche,.pcard.out,
+ul li.glass:not(.empty),ul li.glass.t-agua:not(.empty),ul li.glass.t-leche:not(.empty),ul li.glass.out,
+.scard,.pmcard,.pmbanner,.door,.door-promo.has-cover,.side .glass{
+  border:0 none transparent !important;border-bottom:0 none transparent !important;border-color:transparent !important}
+/* Portada de Promociones: la imagen cubre toda la tarjeta (sin franja abajo) */
+.door-promo.has-cover{background-origin:border-box !important;background-clip:border-box !important}
+
+/* ---------- Panel de precios (administrador) ---------- */
+.pricebox{padding:26px !important}
+.pricebox .ptitle{margin:0 0 16px}
+.pricebox .prices{border-top:0 !important;padding-top:0 !important;grid-template-columns:1fr 1fr;gap:16px}
+.pricebox .prices label{display:flex;flex-direction:column;align-items:stretch;gap:10px}
+.pricebox .plab{display:flex;align-items:center;gap:10px;font-size:.66rem;letter-spacing:.28em;text-transform:uppercase;color:#b7a68f}
+.pricebox .pwrap{position:relative;display:block}
+.pricebox .pwrap b{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-family:var(--serif);font-size:1.2rem;color:#d9bf86;pointer-events:none}
+.pricebox .pwrap input{width:100%;padding:14px 18px 14px 36px !important;font-family:var(--serif);font-size:1.35rem;color:#f4ecdb}
+.pricebox .pnote{margin:16px 0 0;font-size:.76rem;line-height:1.5;color:#8f8173}
+
+/* ---------- Cursor ---------- */
+html.cur-on,html.cur-on *{cursor:none !important}
+html.cur-on input:not([type="checkbox"]):not([type="button"]),html.cur-on textarea{cursor:text !important}
+.cur{position:fixed;left:0;top:0;pointer-events:none;z-index:99999;opacity:0;transition:opacity .35s ease}
+.cur-dot{width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50% !important;background:#f6ead0;
+  box-shadow:0 0 8px rgba(246,234,208,.55)}
+.cur-ring{width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:50% !important;border:1px solid rgba(217,191,134,.65);
+  transition:opacity .35s ease,width .4s var(--ease),height .4s var(--ease),margin .4s var(--ease),background .4s ease,border-color .4s ease}
+.cur-ring.hot{width:60px;height:60px;margin:-30px 0 0 -30px;background:rgba(217,191,134,.12);border-color:rgba(243,223,178,.95)}
+.cur-ring.down{width:26px;height:26px;margin:-13px 0 0 -13px;background:rgba(217,191,134,.22)}
+.cur-dot.off,.cur-ring.off{opacity:0 !important}
+
+/* ---------- Pantallas pequeñas / táctiles: la foto del sabor se ve siempre ---------- */
+@media (max-width:700px),(hover:none){
+  #prev{display:none !important}
+  .cimgw{display:block !important;grid-column:1/-1;width:100%;margin:0 0 20px;border-radius:18px;overflow:hidden;background:transparent}
+  .cimgw img{display:block;width:100%;height:auto;max-height:360px;object-fit:cover;border-radius:18px !important}
+}
 </style>
 </head>
 <body data-mode="home">
@@ -1350,6 +1388,15 @@ body[data-mode="promo"] #nPromo{color:#f4ecdb;border-bottom-color:#a67c5b !impor
     <button class="primary circ" id="addBtn" type="button" title="Agregar" aria-label="Agregar">+</button>
   </form>
 
+  <section class="glass pricebox" aria-label="Precios">
+    <p class="ptitle">Precios</p>
+    <div class="prices">
+      <label><span class="plab"><i class="sw agua"></i>Agua</span><span class="pwrap"><b>$</b><input id="pAgua" type="number" min="0" step="0.5" inputmode="decimal" placeholder="0"></span></label>
+      <label><span class="plab"><i class="sw leche"></i>Leche</span><span class="pwrap"><b>$</b><input id="pLeche" type="number" min="0" step="0.5" inputmode="decimal" placeholder="0"></span></label>
+    </div>
+    <p class="pnote">Se aplica a todos los bolis del mismo tipo. Los cambios se guardan al escribir.</p>
+  </section>
+
   <section class="glass pendbox" aria-label="Pendientes de pago">
     <div class="pbh"><h3>Pendientes de pago</h3><span id="pendTotal">$0</span></div>
     <div class="pform"><input id="pendName" maxlength="40" autocomplete="off" placeholder="Nombre del cliente"><input id="pendAmount" type="number" min="0" step="1" inputmode="decimal" placeholder="$ Monto (opcional)"><button type="button" id="pendAdd" class="primary circ" title="Agregar" aria-label="Agregar">+</button></div>
@@ -1393,9 +1440,6 @@ body[data-mode="promo"] #nPromo{color:#f4ecdb;border-bottom-color:#a67c5b !impor
   <div class="pend only-admin"><span class="ptitle">Cliente con pago pendiente</span><input id="cCustomer" maxlength="40" autocomplete="off" placeholder="Nombre del cliente"><button type="button" id="bPending">Dejar pendiente de pago</button></div>
   <div id="payNote" class="paynote only-user" hidden>Muestra este carrito al vendedor para pagar. Tu pedido se descuenta del inventario cuando él lo registre.</div>
   <div class="drow"><button type="button" id="bPay" class="primary">Cobrar venta</button><button type="button" id="bClearCart">Vaciar</button></div>
-  <div class="prices only-admin"><span class="ptitle">Precio por boli</span>
-    <label><i class="sw agua"></i>Agua <input id="pAgua" type="number" min="0" step="0.5" inputmode="decimal"></label>
-    <label><i class="sw leche"></i>Leche <input id="pLeche" type="number" min="0" step="0.5" inputmode="decimal"></label></div>
   <div class="dfoot only-admin"><span id="todayInfo"></span><button type="button" id="bUndo" class="link">Deshacer última venta</button></div>
 </aside>
 <div id="gate" class="gate"><div class="gbox"><h2>Administrador</h2><p>Escribe la palabra de acceso para entrar</p>
@@ -2453,6 +2497,32 @@ body[data-mode="promo"] #nPromo{color:#f4ecdb;border-bottom-color:#a67c5b !impor
     });
   }
   new MutationObserver(hide).observe(document.body, {attributes: true, attributeFilter: ["data-mode"]});
+
+  /* --- Pantallas pequeñas / táctiles: sin hover, así que cada tarjeta muestra su foto --- */
+  var small = matchMedia("(max-width:700px), (hover:none)");
+  function decorate(){
+    ["list", "shopGrid"].forEach(function(id){
+      var c = document.getElementById(id); if(!c) return;
+      c.querySelectorAll("[data-flavor]").forEach(function(card){
+        var has = card.querySelector(":scope > .cimgw");
+        if(!small.matches){ if(has) has.remove(); return; }
+        if(has) return;
+        var url = fileUrl(card.getAttribute("data-flavor")); if(!url) return;
+        var w = document.createElement("div"), im = document.createElement("img");
+        w.className = "cimgw"; im.alt = ""; im.loading = "lazy"; im.decoding = "async";
+        im.onerror = function(){ w.remove(); };
+        im.src = url; w.appendChild(im);
+        card.insertBefore(w, card.firstChild);
+      });
+    });
+  }
+  ["list", "shopGrid"].forEach(function(id){
+    var c = document.getElementById(id);
+    if(c) new MutationObserver(decorate).observe(c, {childList: true});
+  });
+  if(small.addEventListener) small.addEventListener("change", decorate); else if(small.addListener) small.addListener(decorate);
+  window.addEventListener("bolis:imgs", decorate);
+  decorate();
   addEventListener("scroll", function(){ if(cur) hide(); }, {passive: true});
   loadIndex();
 })();
@@ -2508,5 +2578,34 @@ body[data-mode="promo"] #nPromo{color:#f4ecdb;border-bottom-color:#a67c5b !impor
   }).observe(document.body, {attributes: true, attributeFilter: ["data-mode"]});
 })();
 </script>
+<script>
+/* Cursor: punto crema con anillo suave que se expande sobre lo que se puede tocar (sólo escritorio) */
+(function(){
+  if(!matchMedia("(hover:hover) and (pointer:fine)").matches) return;
+  var dot = document.createElement("div"), ring = document.createElement("div");
+  dot.className = "cur cur-dot"; ring.className = "cur cur-ring";
+  document.body.append(ring, dot);
+  document.documentElement.classList.add("cur-on");
+  var x = -100, y = -100, rx = x, ry = y, seen = false, calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var HOT = 'a,button,summary,label,select,[role="button"],.door,.pcard,.pmcard,.scard,li.glass,.chips button';
+  addEventListener("mousemove", function(e){
+    x = e.clientX; y = e.clientY;
+    if(!seen){ seen = true; rx = x; ry = y; dot.style.opacity = ring.style.opacity = 1; }
+    var t = e.target, txt = t.closest && t.closest('input:not([type="checkbox"]):not([type="button"]),textarea');
+    ring.classList.toggle("hot", !!(t.closest && t.closest(HOT)) && !txt);
+    dot.classList.toggle("off", !!txt); ring.classList.toggle("off", !!txt);
+  }, {passive: true});
+  document.addEventListener("mouseleave", function(){ dot.style.opacity = ring.style.opacity = 0; seen = false; });
+  addEventListener("mousedown", function(){ ring.classList.add("down"); });
+  addEventListener("mouseup", function(){ ring.classList.remove("down"); });
+  (function loop(){
+    rx += (x - rx) * (calm ? 1 : 0.17); ry += (y - ry) * (calm ? 1 : 0.17);
+    dot.style.transform = "translate3d(" + x + "px," + y + "px,0)";
+    ring.style.transform = "translate3d(" + rx + "px," + ry + "px,0)";
+    requestAnimationFrame(loop);
+  })();
+})();
+</script>
+
 </body>
 </html>
