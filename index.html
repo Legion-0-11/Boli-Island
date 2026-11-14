@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap"></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Montserrat:wght@300;400;500;600&display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Montserrat:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Montserrat:wght@300;400;500;600&display=swap"></noscript>
 <title>Boli Island · Inventario</title>
 <style>
 :root{
@@ -1421,6 +1421,103 @@ body::before,body::after{display:none !important}
 }
 @media (max-width:380px){.brandtxt{display:none !important}}
 @media (min-width:821px){.tnav{max-height:none;visibility:visible;opacity:1}}
+
+/* ---------- Fuente imponente: Cinzel (mayúsculas romanas) ---------- */
+:root{--serif:"Cinzel","Trajan Pro","Times New Roman",Georgia,serif}
+body .stext .tagline,body .hero .stext .tagline{font-weight:700;font-size:clamp(1rem,2.4vw,1.4rem);letter-spacing:.3em}
+body .brandtxt{font-weight:700;font-size:1.05rem;letter-spacing:.32em}
+body .door b{font-weight:700;font-size:1.45rem !important;letter-spacing:.12em}
+body .stat b{font-weight:700;font-size:2.6rem !important}
+body .pcard .pname,body .pname{font-weight:700;font-size:1.45rem;letter-spacing:.04em;line-height:1.15}
+body #list li.glass .fname,body .fname{font-weight:700;font-size:1.3rem;letter-spacing:.04em}
+body .scard .sname{font-weight:700;font-size:1.3rem}
+body .scard .sprice{font-weight:600;font-size:1.5rem}
+body .pcard .pprice,body .pprice{font-weight:700;font-size:1.7rem}
+body .mainhead h2,body .shk,body .shakes .shk,body .promo .shk{font-weight:700;font-size:1.7rem !important;letter-spacing:.18em !important}
+body .dtot b{font-weight:700;font-size:2.2rem}
+body .dh h2,body .gbox h2,body .pbh h3{font-weight:700}
+body .pcu,body .pam{font-weight:700}
+body .pmcard .pmname{font-weight:700;font-size:1.4rem}
+@media (max-width:700px){
+  body .door b{font-size:1.2rem !important}
+  body .shk,body .mainhead h2{font-size:1.3rem !important}
+  body .hero .stext .tagline{font-size:clamp(.8rem,3.4vw,1rem);letter-spacing:.22em}
+  body .pcard .pname{font-size:1.3rem}
+}
+
+/* ---------- Icono del menú: líneas finas asimétricas dentro de un aro ---------- */
+.menubtn{gap:6px !important;align-items:flex-end !important;padding:0 11px !important;box-shadow:inset 0 0 0 1px rgba(216,200,162,.38) !important;
+  transition:box-shadow .6s var(--ease) !important}
+.menubtn:hover,.menubtn[aria-expanded="true"]{box-shadow:inset 0 0 0 1px rgba(227,207,168,.9),0 0 16px rgba(166,124,91,.28) !important}
+.menubtn span{height:1.5px !important;border-radius:1px !important;background:linear-gradient(90deg,#f4ecdb,#c9a27a) !important;
+  transition:transform .6s var(--ease),width .5s var(--ease),opacity .3s ease !important}
+.menubtn span:nth-child(1){width:22px !important}
+.menubtn span:nth-child(2){width:15px !important}
+.menubtn span:nth-child(3){width:9px !important}
+.menubtn:hover span:nth-child(2){width:22px !important}
+.menubtn:hover span:nth-child(3){width:15px !important}
+.menubtn[aria-expanded="true"] span{width:22px !important;align-self:center}
+.menubtn[aria-expanded="true"] span:nth-child(1){transform:translateY(7.5px) rotate(45deg) !important}
+.menubtn[aria-expanded="true"] span:nth-child(2){opacity:0 !important}
+.menubtn[aria-expanded="true"] span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg) !important}
+
+/* ---------- Lema: línea completa también en teléfono (faltaba la de "ELEVA TU") ---------- */
+@media (max-width:900px){
+  body .hero .stext.left .tagline::after,body .hero .stext.right .tagline::after{display:block !important;margin:16px 0 0 !important;width:100%;max-width:none}
+  body .hero .stext.left .tagline::after{background:linear-gradient(90deg,transparent,#c9a27a) !important}
+  body .hero .stext.right .tagline::after{background:linear-gradient(90deg,#c9a27a,transparent) !important}
+}
+
+/* ================= Navbar mejorada ================= */
+body .topbar{background:linear-gradient(180deg,#000 0,#060504 100%);border-bottom:0;box-shadow:0 14px 40px rgba(0,0,0,.8)}
+body .topbar::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(201,162,122,.55) 22%,rgba(244,236,219,.9) 50%,rgba(201,162,122,.55) 78%,transparent)}
+/* marca */
+body .brand{gap:0}
+body #hLogo{height:46px;margin-right:18px;filter:drop-shadow(0 0 10px rgba(201,162,122,.5))}
+body .brandtxt{padding-left:18px;border-left:1px solid rgba(216,200,162,.32);line-height:1.1;font-size:1.05rem;letter-spacing:.34em}
+/* enlaces: línea que crece desde el centro */
+body .tnav button{position:relative;border-bottom:0 !important;padding:14px 4px;color:#a99887;font-weight:500;letter-spacing:.26em}
+body .tnav button::after{content:"";position:absolute;left:0;right:0;bottom:6px;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,#e3cfa8,transparent);transform:scaleX(0);transition:transform .8s var(--ease)}
+body .tnav button:hover{color:#f4ecdb}
+body .tnav button:hover::after{transform:scaleX(.55)}
+body[data-mode="home"] #nHome::after,body[data-mode="user"] #nUser::after,body[data-mode="shakes"] #nShakes::after,body[data-mode="promo"] #nPromo::after,body[data-mode="admin"] #nAdmin::after{transform:scaleX(1)}
+body[data-mode="home"] #nHome,body[data-mode="user"] #nUser,body[data-mode="shakes"] #nShakes,body[data-mode="promo"] #nPromo,body[data-mode="admin"] #nAdmin{color:#f4ecdb;border-bottom:0 !important}
+@keyframes navIn{from{opacity:0;filter:blur(6px)}to{opacity:1;filter:none}}
+@media (max-width:820px){
+  body .topbar{padding-right:max(14px,env(safe-area-inset-right));padding-left:max(14px,env(safe-area-inset-left))}
+  body #hLogo{height:40px;margin-right:14px}
+  body .brandtxt{padding-left:14px;font-size:.9rem;letter-spacing:.28em}
+  body .tnav{counter-reset:nv;background:linear-gradient(180deg,#050403,#000);border-bottom:0;box-shadow:0 26px 44px rgba(0,0,0,.92)}
+  body .tnav::after{content:"";display:block;height:1px;margin-top:-1px;background:linear-gradient(90deg,transparent,rgba(201,162,122,.6),transparent)}
+  body .tnav button{display:flex;align-items:center;min-height:62px;padding:0 max(24px,env(safe-area-inset-left)) !important;
+    font-family:var(--serif);font-size:1.02rem !important;letter-spacing:.2em !important;font-weight:600;color:#bfae9a;
+    box-shadow:inset 0 -1px 0 rgba(255,255,255,.06)}
+  body .tnav button::before{counter-increment:nv;content:counter(nv,decimal-leading-zero);font-family:var(--sans);font-size:.6rem;letter-spacing:.24em;
+    color:#a67c5b;margin-right:20px;min-width:22px;font-weight:600}
+  body .tnav button::after{content:"→";left:auto;right:max(24px,env(safe-area-inset-right));top:50%;bottom:auto;height:auto;background:none;
+    transform:translateY(-50%);font-size:1.05rem;letter-spacing:0;color:#a67c5b;opacity:.65;transition:transform .6s var(--ease),opacity .4s ease,color .4s ease}
+  body .tnav button:hover::after{transform:translate(4px,-50%);opacity:1;color:#e3cfa8}
+  body .tnav button:hover{background:rgba(166,124,91,.08) !important}
+  body[data-mode="home"] #nHome,body[data-mode="user"] #nUser,body[data-mode="shakes"] #nShakes,body[data-mode="promo"] #nPromo,body[data-mode="admin"] #nAdmin{background:linear-gradient(90deg,rgba(166,124,91,.18),transparent 85%) !important;color:#f4ecdb;box-shadow:inset 3px 0 0 #c9a27a,inset 0 -1px 0 rgba(255,255,255,.06)}
+  body[data-mode="home"] #nHome::after,body[data-mode="user"] #nUser::after,body[data-mode="shakes"] #nShakes::after,body[data-mode="promo"] #nPromo::after,body[data-mode="admin"] #nAdmin::after{transform:translateY(-50%);opacity:1;color:#e3cfa8}
+  body .tnav.open button{animation:navIn .9s var(--ease) both}
+  body .tnav.open button:nth-child(1){animation-delay:.05s}
+  body .tnav.open button:nth-child(2){animation-delay:.11s}
+  body .tnav.open button:nth-child(3){animation-delay:.17s}
+  body .tnav.open button:nth-child(4){animation-delay:.23s}
+  body .tnav.open button:nth-child(5){animation-delay:.29s}
+}
+@media (max-width:380px){body .tnav button::before{margin-right:14px}}
+@media (prefers-reduced-motion: reduce){body .tnav.open button{animation:none}}
+
+/* ---------- Navbar no fija: se va con el scroll ---------- */
+body .topbar{position:relative;top:auto}
+body .drawer{top:env(safe-area-inset-top,0px);z-index:50}
+@media (max-width:820px){
+  body .tnav{position:absolute !important;top:100%;left:0;right:0}
+}
 </style>
 </head>
 <body data-mode="home">
@@ -1587,7 +1684,7 @@ body::before,body::after{display:none !important}
 <script>
 (function(){
   var KEY = "bolis:v1";
-  var accessBlob = null, unlocked = false, ghFirstLoad = null, mode = "home", shopType = "all", adminType = "all", stockSel = {}, items = [], prices = {agua: 10, leche: 12}, sales = [], pending = [], cart = {};
+  var accessBlob = null, unlocked = false, ghFirstLoad = null, mode = "home", shopType = "all", adminType = "all", stockSel = {}, items = [], prices = {agua: 25, leche: 25}, sales = [], pending = [], cart = {};
 
   function load(){
     try{
@@ -2549,32 +2646,38 @@ body::before,body::after{display:none !important}
   var c=document.getElementById("fx"); if(!c||!c.getContext) return;
   var x=c.getContext("2d"), W=0,H=0,P=[],last=0,raf=0,rt=0,T=0;
   var still=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
-  function mk(draw){var s=document.createElement("canvas");s.width=s.height=64;draw(s.getContext("2d"));return s;}
-  /* círculo lleno con borde suave */
-  var dot=mk(function(g){
-    var f=g.createRadialGradient(32,32,0,32,32,30);
-    f.addColorStop(0,"rgba(255,255,255,1)");f.addColorStop(.55,"rgba(255,255,255,.9)");f.addColorStop(1,"rgba(255,255,255,0)");
-    g.fillStyle=f;g.beginPath();g.arc(32,32,30,0,6.2832);g.fill();
-  });
-  /* círculo hueco */
-  var ring=mk(function(g){
-    g.strokeStyle="#fff";g.lineWidth=2.5;g.beginPath();g.arc(32,32,28,0,6.2832);g.stroke();
-  });
+  /* destello: estrella de cuatro puntas, blanca, con halo suave */
+  var spark=(function(){
+    var s=document.createElement("canvas"); s.width=s.height=64; var g=s.getContext("2d");
+    g.translate(32,32);
+    var h=g.createRadialGradient(0,0,0,0,0,18);
+    h.addColorStop(0,"rgba(255,255,255,.55)");h.addColorStop(1,"rgba(255,255,255,0)");
+    g.fillStyle=h;g.beginPath();g.arc(0,0,18,0,6.2832);g.fill();
+    g.shadowColor="rgba(255,255,255,.95)";g.shadowBlur=8;g.fillStyle="#fff";
+    g.beginPath();
+    g.moveTo(0,-29);g.quadraticCurveTo(1.6,-1.6,29,0);g.quadraticCurveTo(1.6,1.6,0,29);g.quadraticCurveTo(-1.6,1.6,-29,0);g.quadraticCurveTo(-1.6,-1.6,0,-29);
+    g.fill();
+    return s;
+  })();
   function size(){W=innerWidth;H=innerHeight;c.width=W;c.height=H;}
-  function mkP(init){
-    return{ring:Math.random()<.4,x:Math.random()*W,y:init?Math.random()*H:H+50,r:4+Math.random()*22,
-      v:.18+Math.random()*.5,s:Math.random()*6.28,w:.4+Math.random()*.9,a:.12+Math.random()*.4};
+  function mk(){
+    return{x:Math.random()*W,y:Math.random()*H,r:4+Math.random()*11,w:.5+Math.random()*1.3,s:Math.random()*6.28,
+      vy:.03+Math.random()*.09,rot:(Math.random()-.5)*.5};
   }
-  function init(){size();var n=Math.max(14,Math.min(W<700?22:44,(W*H/45000)|0));P=[];for(var i=0;i<n;i++)P.push(mkP(true));}
+  function init(){size();var n=Math.max(18,Math.min(W<700?26:48,(W*H/38000)|0));P=[];for(var i=0;i<n;i++)P.push(mk());}
   function draw(ts){
     raf=0;
     if(ts===undefined||ts-last>=33){
       last=ts||0;T=(ts||0)/1000; x.clearRect(0,0,W,H);
       for(var i=0;i<P.length;i++){var p=P[i];
-        if(!still){p.y-=p.v;p.x+=Math.sin(p.y*.012+p.s)*.35;if(p.y<-60)P[i]=p=mkP(false);}
-        var pulse=still?1:(.8+.2*Math.sin(T*p.w+p.s)), r=p.r*pulse;
-        x.globalAlpha=p.a*(p.ring?1.5:1)*Math.min(1,Math.max(0,(H-p.y+40)/120));
-        x.drawImage(p.ring?ring:dot,p.x-r,p.y-r,r*2,r*2);
+        if(!still){p.y-=p.vy;p.x+=Math.sin(T*.35+p.s)*.12;if(p.y<-20){p.y=H+20;p.x=Math.random()*W;}}
+        var tw=still?.7:Math.pow(Math.max(0,Math.sin(T*p.w+p.s)),2);
+        if(tw<.02) continue;
+        var sz=p.r*(.35+.65*tw);
+        x.globalAlpha=.1+.9*tw;
+        x.save();x.translate(p.x,p.y);x.rotate(p.rot*tw);
+        x.drawImage(spark,-sz,-sz,sz*2,sz*2);
+        x.restore();
       }
       x.globalAlpha=1;
     }
