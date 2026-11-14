@@ -2032,7 +2032,8 @@ ul{gap:18px !important}
     var out = [];
     Object.keys(cart).forEach(function(k){
       var it = findItem(k);
-      if(!it){ delete cart[k]; return; }
+      if(!it || it.qty <= 0){ delete cart[k]; return; }
+      if(cart[k] > it.qty) cart[k] = it.qty;
       if(cart[k] <= 0){ delete cart[k]; return; }
       out.push({k: k, it: it, n: cart[k], price: prices[it.type] || 0});
     });
@@ -2040,6 +2041,7 @@ ul{gap:18px !important}
   }
   function addToCart(it){
     var k = key(it), n = (cart[k] || 0) + 1;
+    if(n > it.qty) return;
     cart[k] = n; render();
     var f = $("fab"); f.classList.remove("pulse"); void f.offsetWidth; f.classList.add("pulse");
   }
@@ -2065,7 +2067,8 @@ ul{gap:18px !important}
       var m = el("button", "", "−"); m.type = "button"; m.setAttribute("aria-label", "Quitar uno");
       m.onclick = function(){ cart[l.k]--; if(cart[l.k] <= 0) delete cart[l.k]; render(); };
       var num = el("span", "", String(l.n));
-      var pl = el("button", "", "+"); pl.type = "button"; pl.setAttribute("aria-label", "Agregar uno"); pl.onclick = function(){ cart[l.k]++; render(); };
+      var pl = el("button", "", "+"); pl.type = "button"; pl.setAttribute("aria-label", "Agregar uno"); pl.disabled = l.n >= l.it.qty;
+      pl.onclick = function(){ if(cart[l.k] < l.it.qty){ cart[l.k]++; render(); } };
       q.append(m, num, pl);
       var rm = el("button", "xbtn", "✕"); rm.type = "button"; rm.setAttribute("aria-label", "Quitar " + l.it.name);
       rm.onclick = function(){ delete cart[l.k]; render(); };
@@ -2226,11 +2229,14 @@ ul{gap:18px !important}
       if(shopType !== "all" && it.type !== shopType) return;
       if(q && it.name.toLowerCase().indexOf(q) === -1) return;
       shown++;
-      var k = key(it), n = cart[k] || 0, out = false, price = PRICE;
+      var k = key(it), n = cart[k] || 0, out = it.qty <= 0, price = PRICE;
       var card = el("div", "pcard t-" + it.type + (out ? " out" : "")); card.setAttribute("data-flavor", it.name);
       var info = el("div", "pinfo");
       info.appendChild(el("span", "pname", it.name));
       info.appendChild(el("span", "ptype " + it.type, it.type === "leche" ? "Boli de leche" : "Boli de agua"));
+      if(!out) info.appendChild(el("span", "pstock " + (it.qty > 10 ? "lv-ok" : it.qty >= 6 ? "lv-mid" : "lv-low"), it.qty + (it.qty === 1 ? " disponible" : " disponibles")));
+      if(out) info.appendChild(el("span", "pbadge out", "Agotado"));
+      else if(it.qty <= 5) info.appendChild(el("span", "pbadge low", "Últimas piezas"));
       var act = el("div", "pact");
       if(!out){
         if(n === 0){
@@ -2240,7 +2246,8 @@ ul{gap:18px !important}
         } else {
           var m = el("button", "", "−"); m.type = "button"; m.setAttribute("aria-label", "Quitar uno");
           m.onclick = function(){ cart[k]--; if(cart[k] <= 0) delete cart[k]; render(); };
-          var pl = el("button", "", "+"); pl.type = "button"; pl.setAttribute("aria-label", "Agregar uno"); pl.onclick = function(){ addToCart(it); };
+          var pl = el("button", "", "+"); pl.type = "button"; pl.setAttribute("aria-label", "Agregar uno"); pl.disabled = n >= it.qty;
+          pl.onclick = function(){ addToCart(it); };
           act.append(m, el("span", "pn", String(n)), pl);
         }
       }
@@ -2268,7 +2275,7 @@ ul{gap:18px !important}
     g.innerHTML = "";
     var list = [];
     (items || []).forEach(function(it){
-      if(!it || list.length >= 9) return;
+      if(!it || it.qty <= 0 || list.length >= 9) return;
       var u = window.flavorImgUrl ? window.flavorImgUrl(it.name) : "";
       if(u) list.push({name: it.name, sub: money(prices[it.type] || 0) + " · Boli de " + (it.type === "leche" ? "leche" : "agua"), tag: PROMO_TAG, url: u});
     });
