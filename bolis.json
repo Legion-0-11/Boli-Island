@@ -124,7 +124,7 @@
     },
     {
       "name": "Pay de Limón",
-      "qty": 0,
+      "qty": 30,
       "type": "leche"
     },
     {
@@ -139,8 +139,8 @@
     }
   ],
   "prices": {
-    "agua": 0,
-    "leche": 0
+    "agua": 25,
+    "leche": 25
   },
   "sales": [
     {
