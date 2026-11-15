@@ -126,6 +126,11 @@
       "name": "Emperador Vainilla",
       "qty": 2,
       "type": "leche"
+    },
+    {
+      "name": "Fresas Nutella",
+      "qty": 29,
+      "type": "leche"
     }
   ],
   "prices": {
