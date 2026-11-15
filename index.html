@@ -1693,6 +1693,37 @@ body .sync.e{background:rgba(180,83,63,.14) !important;color:#e2a592 !important;
 /* el palito de cada boli necesita espacio a la derecha para no cortarse */
 @media (min-width:768px){#list{padding-right:36px !important}}
 @media (prefers-reduced-motion: reduce){.aurora i,.hero::before{animation:none !important}}
+/* ---------- Pantallas chicas: tarjetas de Bolis = tarjetas de Promociones ---------- */
+@media (max-width:700px){
+  /* misma rejilla que .promogrid */
+  body #shopGrid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr)) !important;gap:34px !important;justify-items:center;padding:6px 0 64px !important}
+  /* tarjeta vertical con foto de fondo (como .pmcard) */
+  body #shopGrid .vcard{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-content:end;align-items:end;column-gap:12px;
+    width:100%;max-width:300px;aspect-ratio:3/4.4;overflow:hidden;padding:22px 22px 24px;border-radius:16px !important;background:#080706;text-align:left;
+    transition:transform .9s var(--ease)}
+  body #shopGrid .vcard:hover{transform:translateY(-6px)}
+  /* la foto cubre toda la tarjeta */
+  body #shopGrid .vph{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;border:0;border-radius:0 !important;box-shadow:none}
+  body #shopGrid .vph .vico{width:22%}
+  /* degradado inferior (como .pmshade) */
+  body #shopGrid .vcard::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(5,4,3,.55) 72%,rgba(5,4,3,.92) 100%)}
+  /* texto abajo a la izquierda: etiqueta · nombre · detalle */
+  body #shopGrid .vcap{position:relative;z-index:2;grid-column:1;grid-row:1;margin:0;align-items:flex-start;text-align:left;gap:6px;min-width:0}
+  body #shopGrid .vtype{order:-1;font-size:.58rem;letter-spacing:.3em;color:#d9bf86}
+  body #shopGrid .vtype::before{display:none}
+  body #shopGrid .vname{order:0;font-size:1.4rem;font-weight:700;line-height:1.1;color:#f8f0dd}
+  body #shopGrid .vflag{order:1;font-size:.78rem;letter-spacing:.08em;text-transform:none;color:#cdbca4}
+  body #shopGrid .vflag.vlow{color:#d9917c}
+  /* precio + agregar: sin círculo, a la derecha del texto */
+  body #shopGrid .vpr{position:relative;z-index:2;grid-column:2;grid-row:1;width:auto;aspect-ratio:auto;margin:0;padding:0;border:0;border-radius:0 !important;
+    background:none;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;align-items:flex-end;justify-content:flex-end;gap:8px}
+  body #shopGrid .vprice{font-size:1.5rem;color:#e8cf9f}
+  body #shopGrid .vcard.out .vpr{opacity:.7}
+}
+@media (max-width:420px){
+  body #shopGrid{grid-template-columns:minmax(0,1fr) !important;gap:26px !important}
+}
 </style>
 </head>
 <body data-mode="home">
