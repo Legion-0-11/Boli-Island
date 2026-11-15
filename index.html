@@ -1569,6 +1569,47 @@ ul{gap:18px !important}
   .chips{gap:8px !important}
   .chips button{padding:11px 16px !important}
 }
+/* ---------- Bolis: tarjetas en dos círculos (diagrama de Venn) ---------- */
+body #shopGrid{display:grid !important;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr)) !important;
+  gap:46px 18px !important;justify-items:center;align-items:start;padding:10px 0 80px !important}
+@media (min-width:641px){body #shopGrid{grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr)) !important;gap:60px 30px !important}}
+.vcard{container-type:inline-size;width:100%;max-width:210px;display:flex;flex-direction:column;align-items:center;text-align:center;--ring:#c9a07a}
+.vcard.t-leche{--ring:#f4ecdb}
+.entering .vcard{animation:viewin 1.1s var(--ease) both;animation-delay:calc(var(--i,0) * 70ms)}
+.vph{position:relative;width:100%;aspect-ratio:1;border-radius:50% !important;overflow:hidden;display:grid;place-items:center;
+  border:1px solid var(--ring);
+  background:radial-gradient(circle at 34% 28%,rgba(232,217,181,.18),rgba(166,124,91,.08) 46%,#0a0908 82%);
+  box-shadow:0 0 0 7px rgba(232,217,181,.05),0 24px 46px rgba(0,0,0,.65)}
+.vph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.1s var(--ease)}
+.vph .vico{width:34%;color:rgba(232,217,181,.38)}
+.vph .vico svg{display:block;width:100%;height:auto}
+.vph.has .vico{display:none}
+.vcard:hover .vph img{transform:scale(1.07)}
+/* el círculo del precio es translúcido: en la intersección se ve la foto, como en un diagrama de Venn */
+.vpr{position:relative;z-index:2;width:76%;aspect-ratio:1;margin-top:-24%;border-radius:50% !important;
+  border:1px solid var(--ring);background:rgba(8,7,6,.56);
+  -webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2.4cqw;padding:0 0 10cqw;
+  box-shadow:0 14px 30px rgba(0,0,0,.5)}
+.vprice{font-family:var(--serif);font-weight:600;line-height:1;color:#f4ecdb;font-size:clamp(1.25rem,13cqw,1.85rem);letter-spacing:.02em}
+.vact{display:flex;align-items:center;justify-content:center;gap:2px;min-height:max(32px,15cqw)}
+.vact button{width:max(30px,14cqw);height:max(30px,14cqw);min-width:0;padding:0;border-radius:50% !important;display:grid;place-items:center;
+  font-size:1.05rem;line-height:1;background:rgba(255,255,255,.07);color:#f4ecdb;border:1px solid rgba(232,217,181,.28)}
+.vact button.vadd{width:max(34px,16cqw);height:max(34px,16cqw);font-size:1.3rem;font-weight:700;border:0;color:#1b120a;
+  background:linear-gradient(135deg,#e6c58e,#b4804f)}
+.vact button:disabled{opacity:.35;cursor:default}
+.vact .vn{min-width:1.5em;text-align:center;font-weight:600;color:#f8f0dd;font-size:.95rem}
+.vcap{display:flex;flex-direction:column;align-items:center;gap:6px;margin-top:16px;max-width:100%}
+.vname{font-family:var(--serif);font-weight:700;color:#f4ecdb;letter-spacing:.03em;line-height:1.15;font-size:clamp(1.1rem,9cqw,1.45rem);overflow-wrap:anywhere}
+.vtype{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:#cbbfa6}
+.vtype::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50% !important;margin-right:8px;vertical-align:1px;background:var(--ring)}
+.vflag{font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:#a89c88;background:none !important;border:0 !important;padding:0 !important;box-shadow:none !important}
+.vflag.vlow{color:#d9917c}
+.vflag.vout{color:#8f8173}
+.vcard.out .vph img{filter:grayscale(1) brightness(.5)}
+.vcard.out .vpr{opacity:.62}
+.vcard.out .vname{color:#8f8173}
+@media (prefers-reduced-motion:reduce){.vph img{transition:none}}
 /* precio fijo de $25: no se edita */
 .pricebox{display:none !important}
 /* ---------- Navbar móvil: fija, de vidrio, menú rediseñado ---------- */
@@ -1608,6 +1649,49 @@ ul{gap:18px !important}
   body[data-mode="home"] #nHome::before,body[data-mode="user"] #nUser::before,body[data-mode="shakes"] #nShakes::before,body[data-mode="promo"] #nPromo::before,body[data-mode="admin"] #nAdmin::before{color:#fff}
   body[data-mode="home"] #nHome::after,body[data-mode="user"] #nUser::after,body[data-mode="shakes"] #nShakes::after,body[data-mode="promo"] #nPromo::after,body[data-mode="admin"] #nAdmin::after{color:#fff;opacity:1}
 }
+/* ---------- Administrador: paleta unificada + adaptación a cualquier pantalla ---------- */
+:root{--agua-a:#c9a07a;--agua-b:#8a6244;--leche-a:#f4ecdb;--leche-b:#d8c8a2}
+/* tarjetas: mismo tinte cálido para agua y leche (sin azules) */
+#list li.glass.t-agua:not(.empty),#list li.glass.t-leche:not(.empty),
+ul li.glass.t-agua:not(.empty),ul li.glass.t-leche:not(.empty),.pcard.t-agua,.pcard.t-leche{
+  background:linear-gradient(105deg,rgba(166,124,91,.16) 0,rgba(166,124,91,0) 50%),linear-gradient(180deg,#0b0a09,#070605) !important}
+ul li.glass.t-agua:not(.empty),.pcard.t-agua{border-bottom-color:#a67c5b !important}
+ul li.glass.t-leche:not(.empty),.pcard.t-leche{border-bottom-color:#e8d9b5 !important}
+.pcard .ptype.agua::before,.cbar.agua,.pbr.agua{background:#c9a07a !important}
+/* niveles de existencias dentro de la gama cálida */
+.sbar.s-ok,.sd.g,.pcard .pstock.lv-ok::before,.pcard .pstock::before{background:#e4d3a8 !important}
+.sbar.s-mid,.sd.y,.pcard .pstock.lv-mid::before,.pcard .pstock.mid::before{background:#c98f4e !important}
+.sbar.s-low,.sd.r,.pcard .pstock.lv-low::before,.pcard .pstock.low::before{background:#b4533f !important}
+.pcard .pbadge.low{color:#d9917c !important}
+/* aviso de sincronización (antes amarillo / verde / rojo fuertes) */
+body #syncChip.sync,body .sync{background:rgba(166,124,91,.1) !important;color:#d8c8a2 !important;border:1px solid rgba(216,200,162,.22) !important;border-radius:999px !important;padding:9px 18px !important;line-height:1.4}
+body .sync.g{color:#e4d3a8 !important;border-color:rgba(228,211,168,.35) !important}
+body .sync.e{background:rgba(180,83,63,.14) !important;color:#e2a592 !important;border-color:rgba(180,83,63,.4) !important}
+/* tableta y celular: una columna; panel lateral en dos columnas cuando cabe */
+@media (max-width:1100px){
+  .layout{grid-template-columns:minmax(0,1fr) !important;gap:36px !important}
+  .side{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:20px !important;align-items:start}
+  .side .stats,.side .filebar{grid-column:1/-1}
+  .side .add,.side .pendbox{margin:0 !important;min-width:0}
+}
+@media (max-width:640px){
+  .side{grid-template-columns:minmax(0,1fr) !important;gap:18px !important}
+  body #syncChip.sync,body .sync{border-radius:18px !important;font-size:.62rem !important;padding:10px 16px !important}
+  .stats{gap:12px !important}
+  #list li.glass .ctrl{flex-wrap:wrap}
+}
+/* celular: cada sabor en dos filas (nombre arriba; cantidad y acciones abajo) */
+@media (max-width:767px){
+  #list li.glass:not(.empty){grid-template-columns:auto minmax(0,1fr) auto auto !important;row-gap:14px !important;
+    padding:26px 22px 24px 30px !important;border-radius:40px 20px 20px 40px !important}
+  #list li.glass .fname{grid-column:2/-1}
+  #list li.glass .ctrl{grid-column:1/3 !important;justify-self:start}
+  #list li.glass .cartbtn{grid-column:3 !important;justify-self:end}
+  #list li.glass .del{grid-column:4 !important}
+  .pbh h3{letter-spacing:.16em !important;font-size:1rem !important}
+}
+/* el palito de cada boli necesita espacio a la derecha para no cortarse */
+@media (min-width:768px){#list{padding-right:36px !important}}
 @media (prefers-reduced-motion: reduce){.aurora i,.hero::before{animation:none !important}}
 </style>
 </head>
@@ -2230,17 +2314,22 @@ ul{gap:18px !important}
       if(q && it.name.toLowerCase().indexOf(q) === -1) return;
       shown++;
       var k = key(it), n = cart[k] || 0, out = it.qty <= 0, price = PRICE;
-      var card = el("div", "pcard t-" + it.type + (out ? " out" : "")); card.setAttribute("data-flavor", it.name);
-      var info = el("div", "pinfo");
-      info.appendChild(el("span", "pname", it.name));
-      info.appendChild(el("span", "ptype " + it.type, it.type === "leche" ? "Boli de leche" : "Boli de agua"));
-      if(!out) info.appendChild(el("span", "pstock " + (it.qty > 10 ? "lv-ok" : it.qty >= 6 ? "lv-mid" : "lv-low"), it.qty + (it.qty === 1 ? " disponible" : " disponibles")));
-      if(out) info.appendChild(el("span", "pbadge out", "Agotado"));
-      else if(it.qty <= 5) info.appendChild(el("span", "pbadge low", "Últimas piezas"));
-      var act = el("div", "pact");
+      var card = el("div", "vcard t-" + it.type + (out ? " out" : "")); card.style.setProperty("--i", String(shown - 1));
+      /* círculo 1: foto */
+      var ph = el("div", "vph"), ico = el("span", "vico");
+      ico.innerHTML = '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="14" y="4" width="20" height="29" rx="10"/><path d="M24 33v11"/><path d="M19 13c1.4-1.8 3.6-2.8 6-2.8"/></svg>';
+      ph.appendChild(ico);
+      var u = window.flavorImgUrl ? window.flavorImgUrl(it.name) : "";
+      if(u){
+        var im = document.createElement("img"); im.alt = it.name; im.loading = "lazy"; im.decoding = "async";
+        im.onload = function(){ ph.classList.add("has"); }; im.onerror = function(){ im.remove(); };
+        im.src = u; ph.appendChild(im);
+      }
+      /* círculo 2: precio + agregar, justo debajo y traslapado */
+      var act = el("div", "vact");
       if(!out){
         if(n === 0){
-          var add = el("button", "primary addbtn circ", "+"); add.type = "button"; add.title = "Agregar"; add.setAttribute("aria-label", "Agregar");
+          var add = el("button", "vadd", "+"); add.type = "button"; add.title = "Agregar"; add.setAttribute("aria-label", "Agregar " + it.name);
           add.onclick = function(){ addToCart(it); };
           act.appendChild(add);
         } else {
@@ -2248,11 +2337,16 @@ ul{gap:18px !important}
           m.onclick = function(){ cart[k]--; if(cart[k] <= 0) delete cart[k]; render(); };
           var pl = el("button", "", "+"); pl.type = "button"; pl.setAttribute("aria-label", "Agregar uno"); pl.disabled = n >= it.qty;
           pl.onclick = function(){ addToCart(it); };
-          act.append(m, el("span", "pn", String(n)), pl);
+          act.append(m, el("span", "vn", String(n)), pl);
         }
       }
-      var side = el("div", "pside"); side.append(el("span", "pprice", money(price)), act);
-      card.append(el("span", "cbar " + it.type), info, side);
+      var pr = el("div", "vpr"); pr.append(el("span", "vprice", money(price)), act);
+      /* datos del sabor debajo de los círculos */
+      var cap = el("div", "vcap");
+      cap.append(el("span", "vname", it.name), el("span", "vtype " + it.type, it.type === "leche" ? "Boli de leche" : "Boli de agua"));
+      if(out) cap.appendChild(el("span", "vflag vout", "Agotado"));
+      else cap.appendChild(el("span", "vflag " + (it.qty <= 5 ? "vlow" : "vok"), it.qty <= 5 ? "Últimas piezas · " + it.qty : it.qty + " disponibles"));
+      card.append(ph, pr, cap);
       g.appendChild(card);
     });
     if(!shown) g.appendChild(el("div", "cempty", items.length ? "No hay sabores que coincidan." : "Aún no hay sabores disponibles."));
@@ -2292,6 +2386,7 @@ ul{gap:18px !important}
     });
   }
   window.addEventListener("bolis:imgs", function(){ if(mode === "promo") renderPromos(); });
+  window.addEventListener("bolis:imgs", function(){ if(mode === "user") renderShop(); });
   /* Portada de la sección: img/new.png (tarjeta del inicio y banner dentro de Promociones) */
   (function(){
     var COVER = "img/new.png", door = $("goPromo"), ban = $("promoCover"), bi = ban.querySelector("img");
@@ -2971,7 +3066,7 @@ ul{gap:18px !important}
   document.body.append(ring, dot);
   document.documentElement.classList.add("cur-on");
   var x = -100, y = -100, rx = x, ry = y, seen = false, calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var HOT = 'a,button,summary,label,select,[role="button"],.door,.pcard,.pmcard,.scard,li.glass,.chips button';
+  var HOT = 'a,button,summary,label,select,[role="button"],.door,.pcard,.vcard,.pmcard,.scard,li.glass,.chips button';
   addEventListener("mousemove", function(e){
     x = e.clientX; y = e.clientY;
     if(!seen){ seen = true; rx = x; ry = y; dot.style.opacity = ring.style.opacity = 1; }
