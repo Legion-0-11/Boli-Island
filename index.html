@@ -2748,55 +2748,101 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(227,207,16
     pd.total = pdTotal(pd);
     save(); render();
   }
+  /* Pendientes: cada cliente es una fila con caché; solo se reconstruye la que cambió */
+  var pendCache = {}, pendEmpty = el("div", "pempty", "Nadie tiene pagos pendientes."), fitRaf = 0;
+  function pendSig(pd){ return JSON.stringify([pd.customer, pd.t, pd.extra || 0, pd.total, pd.lines]); }
+  function selSig(){
+    return items.filter(function(x){ return x.qty > 0; }).map(function(x){ return key(x) + ":" + x.qty; }).join("|");
+  }
+  /* Las opciones se cargan al abrir el selector, no en cada render (antes: clientes × sabores nodos) */
+  function fillSel(sel){
+    var sg = selSig(); if(sel._sg === sg) return; sel._sg = sg;
+    sel.textContent = "";
+    var o0 = el("option", "", "＋ Agregar sabor…"); o0.value = ""; sel.appendChild(o0);
+    var fr = document.createDocumentFragment();
+    items.filter(function(x){ return x.qty > 0; }).sort(byName).forEach(function(x){
+      var o = el("option", "", x.name + " · " + (x.type === "leche" ? "leche" : "agua") + " (" + x.qty + ")"); o.value = key(x); fr.appendChild(o);
+    });
+    sel.appendChild(fr);
+  }
+  /* La lista solo hace scroll cuando rebasa la altura de la lista de bolis */
+  function fitPending(){
+    if(fitRaf) return;
+    fitRaf = requestAnimationFrame(function(){
+      fitRaf = 0;
+      var box = $("pendList"), main = document.querySelector(".main"), side = document.querySelector(".side");
+      if(!box || !main || !side || !box.offsetParent) return;
+      box.style.maxHeight = "none";
+      var top = box.getBoundingClientRect().top, mr = main.getBoundingClientRect(), sr = side.getBoundingClientRect();
+      var limit = (mr.left >= sr.right - 4) ? (mr.bottom - top - 30) : innerHeight * 0.7;
+      box.style.maxHeight = Math.max(240, Math.floor(limit)) + "px";
+      box.classList.toggle("scrolls", box.scrollHeight > box.clientHeight + 1);
+    });
+  }
+  if(window.ResizeObserver) new ResizeObserver(fitPending).observe(document.querySelector(".main"));
+  addEventListener("resize", fitPending);
+
+  function buildPendRow(pd){
+    function cur(){ var i = pendIndex(pd.id); return i < 0 ? pd : pending[i]; }
+    var row = el("div", "pr");
+    var info = el("div", "pi");
+    info.appendChild(el("span", "pcu", pd.customer));
+    var ls = el("div", "pls");
+    pd.lines.forEach(function(l, li){
+      var r = el("div", "pl");
+      var m = el("button", "", "−"); m.type = "button"; m.setAttribute("aria-label", "Quitar uno de " + l.name);
+      m.onclick = function(){ adjustPending(pd.id, li, -1); };
+      var pl = el("button", "", "+"); pl.type = "button"; pl.setAttribute("aria-label", "Agregar uno de " + l.name);
+      pl.onclick = function(){ adjustPending(pd.id, li, 1); };
+      var q = el("div", "plq"); q.append(m, el("span", "", String(l.qty)), pl);
+      r.append(el("i", "pbr " + l.type), el("span", "pln", l.name), q, el("span", "pls2", money(l.qty * l.price)));
+      ls.appendChild(r);
+    });
+    if(!pd.lines.length && !(pd.extra > 0)) ls.appendChild(el("span", "pdt", "Aún sin bolis. Elige un sabor o escribe un monto."));
+    var xr = el("div", "pl pex");
+    var xm = el("button", "", "−"); xm.type = "button"; xm.setAttribute("aria-label", "Restar 5 pesos");
+    xm.onclick = function(){ setExtra(pd.id, (cur().extra || 0) - 5); };
+    var xi = el("input"); xi.type = "number"; xi.min = "0"; xi.step = "1"; xi.value = pd.extra || 0; xi.setAttribute("aria-label", "Monto sin detallar de " + pd.customer);
+    xi.onchange = function(){ setExtra(pd.id, xi.value); };
+    var xp = el("button", "", "+"); xp.type = "button"; xp.setAttribute("aria-label", "Sumar 5 pesos");
+    xp.onclick = function(){ setExtra(pd.id, (cur().extra || 0) + 5); };
+    var xq = el("div", "pexq"); xq.append(xm, xi, xp);
+    xr.append(el("i", "pbr gold"), el("span", "pln", "Monto libre ($)"), xq);
+    ls.appendChild(xr);
+    info.appendChild(ls);
+    var sel = el("select", "padd"); sel.setAttribute("aria-label", "Agregar sabor a " + pd.customer);
+    var o0 = el("option", "", "＋ Agregar sabor…"); o0.value = ""; sel.appendChild(o0);
+    var fill = function(){ fillSel(sel); };
+    sel.addEventListener("pointerdown", fill);
+    sel.addEventListener("touchstart", fill, {passive: true});
+    sel.addEventListener("focus", fill);
+    sel.addEventListener("keydown", fill);
+    sel.onchange = function(){ if(sel.value) addLineToPending(pd.id, sel.value); };
+    info.appendChild(sel);
+    var d = new Date(pd.t);
+    info.appendChild(el("span", "pda", isNaN(d) ? "" : d.toLocaleDateString("es-MX", {day: "numeric", month: "short"})));
+    var acts = el("div", "pa");
+    var ok = el("button", "primary circ", "✓"); ok.type = "button"; ok.title = "Pagado"; ok.setAttribute("aria-label", "Pagado"); ok.disabled = !(pd.total > 0); ok.onclick = function(){ payPending(pd.id); };
+    var back = el("button", "circ", pd.lines.length ? "↩" : "✕"); back.type = "button"; back.title = pd.lines.length ? "Devolver" : "Quitar"; back.setAttribute("aria-label", back.title); back.onclick = function(){ returnPending(pd.id); };
+    acts.append(ok, back);
+    row.append(info, el("b", "pam", money(pd.total)), acts);
+    return row;
+  }
   function renderPending(){
-    var box = $("pendList"), tot = 0;
-    box.textContent = "";
+    var box = $("pendList"), tot = 0, seen = {}, nodes = [];
     pending.slice().sort(function(a, b){ return a.t < b.t ? -1 : 1; }).forEach(function(pd){
       tot += pd.total;
-      var row = el("div", "pr");
-      var info = el("div", "pi");
-      info.appendChild(el("span", "pcu", pd.customer));
-      var ls = el("div", "pls");
-      pd.lines.forEach(function(l, li){
-        var r = el("div", "pl");
-        var m = el("button", "", "−"); m.type = "button"; m.setAttribute("aria-label", "Quitar uno de " + l.name);
-        m.onclick = function(){ adjustPending(pd.id, li, -1); };
-        var pl = el("button", "", "+"); pl.type = "button"; pl.setAttribute("aria-label", "Agregar uno de " + l.name);
-        pl.onclick = function(){ adjustPending(pd.id, li, 1); };
-        var q = el("div", "plq"); q.append(m, el("span", "", String(l.qty)), pl);
-        r.append(el("i", "pbr " + l.type), el("span", "pln", l.name), q, el("span", "pls2", money(l.qty * l.price)));
-        ls.appendChild(r);
-      });
-      if(!pd.lines.length && !(pd.extra > 0)) ls.appendChild(el("span", "pdt", "Aún sin bolis. Elige un sabor o escribe un monto."));
-      var xr = el("div", "pl pex");
-      var xm = el("button", "", "−"); xm.type = "button"; xm.setAttribute("aria-label", "Restar 5 pesos");
-      xm.onclick = function(){ setExtra(pd.id, (pd.extra || 0) - 5); };
-      var xi = el("input"); xi.type = "number"; xi.min = "0"; xi.step = "1"; xi.value = pd.extra || 0; xi.setAttribute("aria-label", "Monto sin detallar de " + pd.customer);
-      xi.onchange = function(){ setExtra(pd.id, xi.value); };
-      var xp = el("button", "", "+"); xp.type = "button"; xp.setAttribute("aria-label", "Sumar 5 pesos");
-      xp.onclick = function(){ setExtra(pd.id, (pd.extra || 0) + 5); };
-      var xq = el("div", "pexq"); xq.append(xm, xi, xp);
-      xr.append(el("i", "pbr gold"), el("span", "pln", "Monto libre ($)"), xq);
-      ls.appendChild(xr);
-      info.appendChild(ls);
-      var sel = el("select", "padd"); sel.setAttribute("aria-label", "Agregar sabor a " + pd.customer);
-      var o0 = el("option", "", "＋ Agregar sabor…"); o0.value = ""; sel.appendChild(o0);
-      items.filter(function(x){ return x.qty > 0; }).sort(byName).forEach(function(x){
-        var o = el("option", "", x.name + " · " + (x.type === "leche" ? "leche" : "agua") + " (" + x.qty + ")"); o.value = key(x); sel.appendChild(o);
-      });
-      sel.onchange = function(){ if(sel.value) addLineToPending(pd.id, sel.value); };
-      info.appendChild(sel);
-      var d = new Date(pd.t);
-      info.appendChild(el("span", "pda", isNaN(d) ? "" : d.toLocaleDateString("es-MX", {day: "numeric", month: "short"})));
-      var acts = el("div", "pa");
-      var ok = el("button", "primary circ", "✓"); ok.type = "button"; ok.title = "Pagado"; ok.setAttribute("aria-label", "Pagado"); ok.disabled = !(pd.total > 0); ok.onclick = function(){ payPending(pd.id); };
-      var back = el("button", "circ", pd.lines.length ? "↩" : "✕"); back.type = "button"; back.title = pd.lines.length ? "Devolver" : "Quitar"; back.setAttribute("aria-label", back.title); back.onclick = function(){ returnPending(pd.id); };
-      acts.append(ok, back);
-      row.append(info, el("b", "pam", money(pd.total)), acts);
-      box.appendChild(row);
+      var sg = pendSig(pd), c = pendCache[pd.id];
+      if(!c || c.sg !== sg) c = pendCache[pd.id] = {sg: sg, node: buildPendRow(pd)};
+      seen[pd.id] = 1; nodes.push(c.node);
     });
-    if(!pending.length) box.appendChild(el("div", "pempty", "Nadie tiene pagos pendientes."));
+    Object.keys(pendCache).forEach(function(k){ if(!seen[k]) delete pendCache[k]; });
+    if(!nodes.length) nodes.push(pendEmpty);
+    var kids = box.children, same = kids.length === nodes.length;
+    for(var i = 0; same && i < nodes.length; i++) if(kids[i] !== nodes[i]) same = false;
+    if(!same) box.replaceChildren.apply(box, nodes);
     $("pendTotal").textContent = money(tot);
+    fitPending();
   }
 
   /* ---------- Sincronización con GitHub (rama main) ---------- */
@@ -3369,5 +3415,19 @@ document.addEventListener("visibilitychange", function(){ document.body.classLis
   init(); raf=requestAnimationFrame(loop);
 })();
 </script>
+<style id="pend-fix">
+/* Pendientes de pago: scroll solo cuando la lista rebasa la lista de bolis, con el estilo negro y café */
+.pendlist{overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain}
+.pendlist.scrolls{padding-right:12px}
+.pendlist::-webkit-scrollbar,html::-webkit-scrollbar{width:6px;height:6px}
+.pendlist::-webkit-scrollbar-track,html::-webkit-scrollbar-track{background:transparent}
+html::-webkit-scrollbar-track{background:#000}
+.pendlist::-webkit-scrollbar-thumb,html::-webkit-scrollbar-thumb{background:#5e422f;border-radius:6px !important}
+.pendlist::-webkit-scrollbar-thumb:hover,html::-webkit-scrollbar-thumb:hover{background:#a67c5b}
+.pendlist::-webkit-scrollbar-button,html::-webkit-scrollbar-button{display:none;width:0;height:0}
+@supports not selector(::-webkit-scrollbar){
+  .pendlist,html{scrollbar-width:thin;scrollbar-color:#5e422f transparent}
+}
+</style>
 </body>
 </html>
