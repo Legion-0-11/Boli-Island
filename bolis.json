@@ -186,12 +186,5 @@
       "extra": 300,
       "total": 300
     }
-  ],
-  "acceso": {
-    "v": 1,
-    "it": 600000,
-    "salt": "gMhkuoLr81TVo0sVcRequA==",
-    "iv": "wg9WwuU8pH/EH5Xy",
-    "data": "NWMkJ9K/XtzRAhA0rPyzKKMiS2qCXKgaQlNctxfFy9yrx+TlSX8pDOBr2LvNh70PvNWuodIM1lJx+uLFuTMG6VpuC/dkQqXuDkoJJfNF7gOvjNnrV4/JNPO3HvtkFZ8UAx4QE4luUG2YO+oWxTqaCPU36R6qQtlwcdddR/M9sLu9CT17qt7eWD08W+PCvmp39NZwa13bfkRD"
-  }
+  ]
 }
