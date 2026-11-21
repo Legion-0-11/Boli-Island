@@ -59,7 +59,7 @@
     },
     {
       "name": "Rompope",
-      "qty": 29,
+      "qty": 28,
       "type": "leche"
     },
     {
@@ -189,9 +189,16 @@
       "id": "mwr03kort8cl",
       "customer": "Casquito",
       "t": "2026-11-21T22:49:58.395Z",
-      "lines": [],
+      "lines": [
+        {
+          "name": "Rompope",
+          "type": "leche",
+          "qty": 1,
+          "price": 25
+        }
+      ],
       "extra": 200,
-      "total": 200
+      "total": 225
     }
   ]
 }
