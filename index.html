@@ -2921,11 +2921,11 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(227,207,16
     for(var i = 0; i < bin.length; i++) b[i] = bin.charCodeAt(i);
     return new TextDecoder().decode(b);
   }
-  function ghApi(method, body){
+  function ghApi(method, body, noAuth){
     var url = "https://api.github.com/repos/" + encodeURIComponent(GH.owner) + "/" + encodeURIComponent(GH.repo) + "/contents/" + GH.path.split("/").map(encodeURIComponent).join("/");
     if(method === "GET") url += "?ref=" + encodeURIComponent(GH.branch) + "&t=" + Date.now();
     var o = {method: method, headers: {"Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28"}};
-    if(GH.token) o.headers["Authorization"] = "Bearer " + GH.token;
+    if(GH.token && !noAuth) o.headers["Authorization"] = "Bearer " + GH.token;
     if(body){ o.body = JSON.stringify(body); o.headers["Content-Type"] = "application/json"; }
     return fetch(url, o);
   }
@@ -2939,35 +2939,49 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(227,207,16
     var keep = cart; applyData(text); cart = keep; saveLocal(); render();
     return "remote";
   }
-  function ghLoad(manual){
-    var req;
-    if(ghHasToken()){
+  /* Lectura pública: nunca usa el token. Es lo que ven los clientes. */
+  function publicRead(){
+    return (GH.owner && GH.repo
+      ? ghApi("GET", null, true).then(function(r){
+          if(!r.ok) throw new Error("HTTP " + r.status);
+          return r.json().then(function(j){ return b64dec(j.content); });
+        })
+      : Promise.reject(new Error("sin repositorio"))
+    ).catch(function(){ return pagesFile(); });
+  }
+  function ghLoad(manual, pub){
+    var req, useTok = ghHasToken() && !pub, tokErr = "";
+    if(useTok){
       req = ghApi("GET").then(function(r){
         if(r.status === 404){ ghSha = ""; return null; }
         if(!r.ok) throw new Error(r.status === 401 || r.status === 403 ? "token sin permiso" : "HTTP " + r.status);
         return r.json().then(function(j){ ghSha = j.sha; return b64dec(j.content); });
+      }).catch(function(e){
+        /* Si el token falla, igual se muestran los datos actuales (lectura pública) */
+        tokErr = e.message;
+        return publicRead();
       });
     } else {
-      req = (GH.owner && GH.repo
-        ? ghApi("GET").then(function(r){
-            if(!r.ok) throw new Error("HTTP " + r.status);
-            return r.json().then(function(j){ return b64dec(j.content); });
-          })
-        : Promise.reject(new Error("sin repositorio"))
-      ).catch(function(){ return pagesFile(); });
+      req = publicRead();
     }
     return req.then(function(text){
-      if(ghState !== "saving" && ghState !== "error") ghState = ghHasToken() ? "ok" : "read";
+      if(useTok && !tokErr && ghState !== "saving" && ghState !== "error") ghState = "ok";
+      else if(!useTok && !ghHasToken() && ghState !== "saving" && ghState !== "error") ghState = "read";
       if(text === null){
         ghStatus("GitHub conectado: el archivo aún no existe y se creará al guardar.", true);
-        if(ghHasToken()) ghQueueSave();
+        if(useTok) ghQueueSave();
         return;
       }
       var res = adoptRemote(text);
-      ghStatus(res === "remote" ? "Datos cargados desde GitHub ✓" : "El archivo de GitHub está vacío: se subirá lo que hay en este dispositivo.", true);
-      if(res === "local" && ghHasToken()) ghQueueSave();
+      if(tokErr) ghStatus("Datos cargados, pero el token no funciona (" + tokErr + "). Vuelve a poner la palabra de acceso o un token nuevo.");
+      else ghStatus(res === "remote" ? "Datos cargados desde GitHub ✓" : "El archivo de GitHub está vacío: se subirá lo que hay en este dispositivo.", true);
+      if(res === "local" && useTok) ghQueueSave();
       if(manual) toast("Datos actualizados desde GitHub");
     }).catch(function(e){ ghStatus("No se pudo cargar desde GitHub (" + e.message + ")."); });
+  }
+  /* Carga según la vista: clientes = pública (sin token); administrador = con token */
+  function loadView(manual){
+    return (mode === "admin" && ghHasToken()) ? ghLoad(manual) : ghLoad(manual, true);
   }
   function ghQueueSave(){
     if(!ghHasToken()) return;
@@ -3049,7 +3063,7 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(227,207,16
   };
 
   $("shopRefresh").onclick = function(){
-    if(location.protocol.indexOf("http") === 0) ghLoad(true); else toast("Abre la página publicada para actualizar");
+    if(location.protocol.indexOf("http") === 0) loadView(true); else toast("Abre la página publicada para actualizar");
   };
   setInterval(function(){
     var a = document.activeElement, typing = a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName);
@@ -3088,16 +3102,16 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(227,207,16
     if(!cfg || !cfg.token || GH.token) return;
     GH.token = cfg.token; GH.owner = GH.owner || cfg.owner || ""; GH.repo = GH.repo || cfg.repo || "";
     try{ localStorage.setItem(GH_KEY, JSON.stringify({owner: GH.owner, repo: GH.repo, token: GH.token})); }catch(e){}
-    ghFill(); updateSync(); ghLoad(false);
+    ghFill(); updateSync(); loadView(false);
   });
   load(); setMode("home"); restoreHandle();
-  if(location.protocol.indexOf("http") === 0 || ghHasToken()) ghFirstLoad = ghLoad(false);
+  if(location.protocol.indexOf("http") === 0 || ghHasToken()) ghFirstLoad = ghLoad(false, location.protocol.indexOf("http") === 0);
   else ghStatus("Sin conexión a GitHub: abre la página publicada o configura el token.");
   document.addEventListener("visibilitychange", function(){
-    if(!document.hidden && !ghDirty && !ghBusy && (ghHasToken() || location.protocol.indexOf("http") === 0)) ghLoad(false);
+    if(!document.hidden && !ghDirty && !ghBusy && (ghHasToken() || location.protocol.indexOf("http") === 0)) loadView(false);
   });
   setInterval(function(){
-    if(!document.hidden && !ghDirty && !ghBusy && !ghHasToken() && location.protocol.indexOf("http") === 0) ghLoad(false);
+    if(!document.hidden && !ghDirty && !ghBusy && mode !== "admin" && location.protocol.indexOf("http") === 0) loadView(false);
   }, 180000);
 })();
 </script>
