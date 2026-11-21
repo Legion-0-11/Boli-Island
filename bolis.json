@@ -151,17 +151,16 @@
       "extra": 20,
       "total": 20,
       "customer": "Master"
+    },
+    {
+      "t": "2026-11-21T22:49:45.815Z",
+      "lines": [],
+      "extra": 200,
+      "total": 200,
+      "customer": "Casquito"
     }
   ],
   "pending": [
-    {
-      "id": "mvekkqlpb25v",
-      "customer": "Casquito",
-      "t": "2026-10-19T01:22:28.909Z",
-      "lines": [],
-      "extra": 200,
-      "total": 200
-    },
     {
       "id": "mwh8xzi7j6uk",
       "customer": "SOCIO ARIADNA",
