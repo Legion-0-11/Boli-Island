@@ -2288,7 +2288,9 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(var(--c67)
         if(confirm("¿Eliminar “" + it.name + "”?")){ items.splice(i, 1); save(); render(); }
       };
 
-      var sb = document.createElement("span"); sb.className = "sbar " + lvl;
+      bar.textContent = it.type === "leche" ? "Leche" : "Agua";
+      var sb = document.createElement("span"); sb.className = "sbar " + lvl + (it.qty <= 0 ? " zero" : "");
+      sb.textContent = it.qty <= 0 ? "Agotado" : lvl === "s-ok" ? "Más de 10" : lvl === "s-mid" ? "10 a 6" : "5 o menos";
       sb.title = "Existencias: " + (lvl === "s-ok" ? "más de 10" : lvl === "s-mid" ? "de 10 a 6" : "5 o menos");
       var bars = document.createElement("div"); bars.className = "bars"; bars.append(bar, sb);
       li.append(bars, nm, ctrl, cb, del);
@@ -3751,13 +3753,53 @@ body[data-mode="admin"] .side .glass{border:1px solid rgba(var(--c75),.16) !impo
 
 /* lista de inventario: más compacta y en dos columnas cuando hay espacio */
 body[data-mode="admin"] #list{grid-template-columns:repeat(auto-fill,minmax(520px,1fr)) !important;gap:16px 18px !important}
-/* filas del inventario: mismo color y borde que la barra de filtros, con más aire */
-body[data-mode="admin"] #list li.glass,body[data-mode="admin"] #list li.glass:hover,
-body[data-mode="admin"] #list li.glass.t-agua,body[data-mode="admin"] #list li.glass.t-leche,body[data-mode="admin"] #list li.glass.out{
-  padding:22px 38px !important;min-height:0 !important;border-radius:999px !important;
-  background:rgba(255,255,255,.05) !important;background-image:none !important;
-  border:1px solid rgba(var(--c163),.24) !important;box-shadow:none !important}
-body[data-mode="admin"] #list{gap:16px 18px !important}
+/* filas del inventario: tarjetas con aire, color por tipo y etiquetas claras */
+body[data-mode="admin"] #viewAdmin #list{gap:22px 22px !important}
+body[data-mode="admin"] #viewAdmin #list li.glass,body[data-mode="admin"] #viewAdmin #list li.glass:hover,
+body[data-mode="admin"] #viewAdmin #list li.glass.t-agua,body[data-mode="admin"] #viewAdmin #list li.glass.t-leche,body[data-mode="admin"] #viewAdmin #list li.glass.out{
+  --tc:95,196,232;
+  display:grid !important;grid-template-columns:minmax(0,1fr) auto auto auto;
+  grid-template-areas:"name ctrl cart del" "bars ctrl cart del";
+  align-items:center;column-gap:26px;row-gap:12px;
+  padding:26px 34px 26px 38px !important;min-height:0 !important;border-radius:26px !important;
+  background:linear-gradient(100deg,rgba(var(--tc),.13) 0,rgba(var(--tc),.04) 38%,rgba(255,255,255,.035) 100%) !important;background-image:linear-gradient(100deg,rgba(var(--tc),.13) 0,rgba(var(--tc),.04) 38%,rgba(255,255,255,.035) 100%) !important;
+  border:1px solid rgba(var(--tc),.22) !important;
+  box-shadow:inset 4px 0 0 0 rgba(var(--tc),.85) !important;transform:none !important;
+  transition:border-color .3s ease,background .3s ease}
+body[data-mode="admin"] #viewAdmin #list li.glass.t-leche{--tc:var(--c171)}
+body[data-mode="admin"] #viewAdmin #list li.glass:hover{border-color:rgba(var(--tc),.5) !important}
+body[data-mode="admin"] #viewAdmin #list li.glass.out{opacity:.72}
+body[data-mode="admin"] #viewAdmin #list li.glass .fname{grid-area:name;font-size:1.45rem;line-height:1.15;letter-spacing:.03em}
+body[data-mode="admin"] #viewAdmin #list li.glass .bars{grid-area:bars;display:flex;flex-direction:row;align-items:center;gap:10px;width:auto;height:auto}
+body[data-mode="admin"] #viewAdmin #list li.glass .ctrl{grid-area:ctrl;gap:2px;padding:5px;border-radius:999px;background:rgba(0,0,0,.28);border:1px solid rgba(var(--c163),.2);margin:0}
+body[data-mode="admin"] #viewAdmin #list li.glass .ctrl button{width:38px;height:38px;border:0 !important;background:transparent !important}
+body[data-mode="admin"] #viewAdmin #list li.glass .ctrl button:hover{background:rgba(255,255,255,.1) !important}
+body[data-mode="admin"] #viewAdmin #list li.glass .ctrl input{width:58px;height:38px;padding:0;border:0 !important;border-radius:999px;background:transparent !important;font-size:1.1rem;font-weight:600;color:#fff;text-align:center}
+body[data-mode="admin"] #viewAdmin #list li.glass .cartbtn{grid-area:cart;width:46px;height:46px;margin-left:6px;border:0 !important;color:#fff;
+  background:linear-gradient(135deg,rgb(var(--c169)),rgb(var(--c170))) !important;box-shadow:0 8px 18px -8px rgba(var(--c170),.9)}
+body[data-mode="admin"] #viewAdmin #list li.glass .cartbtn:disabled{background:rgba(255,255,255,.06) !important;box-shadow:none;color:rgb(var(--c48))}
+body[data-mode="admin"] #viewAdmin #list li.glass .cartbtn:not(:disabled):hover{filter:brightness(1.12);color:#fff;background:linear-gradient(135deg,rgb(var(--c169)),rgb(var(--c170))) !important}
+body[data-mode="admin"] #viewAdmin #list li.glass .del{grid-area:del;width:40px;height:40px;border:0 !important;background:transparent !important;color:rgba(255,255,255,.45)}
+body[data-mode="admin"] #viewAdmin #list li.glass .del:hover{color:#ff8a80;background:rgba(239,106,94,.14) !important}
+
+/* etiquetas de tipo y existencias */
+body[data-mode="admin"] #viewAdmin #list .tbar,body[data-mode="admin"] #viewAdmin #list .sbar{position:relative;display:inline-flex;align-items:center;width:auto !important;height:auto !important;min-height:0 !important;min-width:0;
+  margin:0;padding:6px 14px 6px 28px !important;border-radius:999px !important;border:1px solid rgba(var(--c163),.2) !important;
+  background:rgba(255,255,255,.06) !important;color:rgb(var(--c168));font-size:.6rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;line-height:1;white-space:nowrap;box-shadow:none !important;animation:none}
+body[data-mode="admin"] #viewAdmin #list .tbar::before,body[data-mode="admin"] #viewAdmin #list .sbar::before{content:"";position:absolute;left:12px;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:var(--dc);box-shadow:0 0 8px var(--dc)}
+body[data-mode="admin"] #viewAdmin #list .tbar::after,body[data-mode="admin"] #viewAdmin #list .sbar::after{display:none}
+body[data-mode="admin"] #viewAdmin #list .tbar.agua{--dc:#5fc4e8}
+body[data-mode="admin"] #viewAdmin #list .tbar.leche{--dc:rgb(var(--c171))}
+body[data-mode="admin"] #viewAdmin #list .tbar{cursor:pointer}
+body[data-mode="admin"] #viewAdmin #list .tbar:hover{color:#fff;border-color:rgba(var(--c167),.6) !important}
+body[data-mode="admin"] #viewAdmin #list .sbar.s-ok{--dc:#5fcf9d}
+body[data-mode="admin"] #viewAdmin #list .sbar.s-mid{--dc:#f0c15a}
+body[data-mode="admin"] #viewAdmin #list .sbar.s-low{--dc:#ef6a5e}
+body[data-mode="admin"] #viewAdmin #list .sbar.zero{--dc:#8b8794;color:rgba(255,255,255,.55)}
+body[data-mode="admin"] #viewAdmin #list li.glass .ctrl{border-radius:999px !important}
+body[data-mode="admin"] #viewAdmin #list li.glass .ctrl button,body[data-mode="admin"] #viewAdmin #list li.glass .cartbtn,body[data-mode="admin"] #viewAdmin #list li.glass .del,body[data-mode="admin"] #viewAdmin #list li.glass .ctrl input{border-radius:50% !important}
+body[data-mode="admin"] #viewAdmin #list li.glass .ctrl input{border-radius:999px !important}
+body[data-mode="admin"] #viewAdmin #list .tbar::before,body[data-mode="admin"] #viewAdmin #list .sbar::before{border-radius:50% !important}
 body[data-mode="admin"] #list li.glass.out{opacity:.78}
 body[data-mode="admin"] #list{padding:0 !important}
 /* sin la pestaña que sobresalía a la derecha: el tipo ya se indica con la barra de color */
@@ -3802,9 +3844,10 @@ body[data-mode="admin"] #list li.glass::after{display:none !important}
   #viewAdmin .filters .chips{flex:1 1 100%}
   #viewAdmin .filters .chips button{flex:1;padding:0 6px !important;letter-spacing:.06em;font-size:.58rem;white-space:nowrap}
   body[data-mode="admin"] #list{grid-template-columns:minmax(0,1fr) !important}
-  body[data-mode="admin"] #list li.glass,body[data-mode="admin"] #list li.glass:hover,
-  body[data-mode="admin"] #list li.glass.t-agua,body[data-mode="admin"] #list li.glass.t-leche,body[data-mode="admin"] #list li.glass.out{
-    border-radius:30px !important;padding:20px 22px !important}
+  body[data-mode="admin"] #viewAdmin #list li.glass,body[data-mode="admin"] #viewAdmin #list li.glass:hover,
+  body[data-mode="admin"] #viewAdmin #list li.glass.t-agua,body[data-mode="admin"] #viewAdmin #list li.glass.t-leche,body[data-mode="admin"] #viewAdmin #list li.glass.out{
+    grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"name name name" "bars bars bars" "ctrl cart del";
+    column-gap:12px;row-gap:14px;padding:22px 20px 22px 24px !important;border-radius:24px !important}
 }
 </style>
 <script>
