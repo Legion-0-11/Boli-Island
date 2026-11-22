@@ -3751,7 +3751,13 @@ body[data-mode="admin"] .side .glass{border:1px solid rgba(var(--c75),.16) !impo
 
 /* lista de inventario: más compacta y en dos columnas cuando hay espacio */
 body[data-mode="admin"] #list{grid-template-columns:repeat(auto-fill,minmax(520px,1fr)) !important;gap:16px 18px !important}
-body[data-mode="admin"] #list li.glass{padding:16px 22px !important;min-height:0 !important}
+/* filas del inventario: mismo color y borde que la barra de filtros, con más aire */
+body[data-mode="admin"] #list li.glass,body[data-mode="admin"] #list li.glass:hover,
+body[data-mode="admin"] #list li.glass.t-agua,body[data-mode="admin"] #list li.glass.t-leche,body[data-mode="admin"] #list li.glass.out{
+  padding:22px 38px !important;min-height:0 !important;border-radius:999px !important;
+  background:rgba(255,255,255,.05) !important;background-image:none !important;
+  border:1px solid rgba(var(--c163),.24) !important;box-shadow:none !important}
+body[data-mode="admin"] #list{gap:16px 18px !important}
 body[data-mode="admin"] #list li.glass.out{opacity:.78}
 body[data-mode="admin"] #list{padding:0 !important}
 /* sin la pestaña que sobresalía a la derecha: el tipo ya se indica con la barra de color */
@@ -3796,6 +3802,9 @@ body[data-mode="admin"] #list li.glass::after{display:none !important}
   #viewAdmin .filters .chips{flex:1 1 100%}
   #viewAdmin .filters .chips button{flex:1;padding:0 6px !important;letter-spacing:.06em;font-size:.58rem;white-space:nowrap}
   body[data-mode="admin"] #list{grid-template-columns:minmax(0,1fr) !important}
+  body[data-mode="admin"] #list li.glass,body[data-mode="admin"] #list li.glass:hover,
+  body[data-mode="admin"] #list li.glass.t-agua,body[data-mode="admin"] #list li.glass.t-leche,body[data-mode="admin"] #list li.glass.out{
+    border-radius:30px !important;padding:20px 22px !important}
 }
 </style>
 <script>
