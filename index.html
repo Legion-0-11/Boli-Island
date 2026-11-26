@@ -2502,8 +2502,12 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(var(--c67)
     Promise.all([hp2, ghFirstLoad || Promise.resolve()]).then(function(r){
       if(r[0] !== ACCESS_HASH) throw new Error("mala");
       if(!accessBlob){ closeGate(); setMode("admin"); return; }
+      /* Token insertado a mano en este dispositivo: se conserva hasta que el usuario lo quite */
+      if(GH.src === "manual" && ghHasToken()){
+        unlocked = true; closeGate(); ghFill(); setMode("admin"); ghLoad(false); return;
+      }
       return openAccess(word, accessBlob).then(function(o){
-        GH.owner = o.o; GH.repo = o.r; GH.token = o.t; unlocked = true; ghPersist();
+        GH.owner = o.o; GH.repo = o.r; GH.token = o.t; GH.src = "access"; unlocked = true; ghPersist();
         closeGate(); ghFill(); setMode("admin"); ghLoad(false);
       }).catch(function(){
         closeGate(); setMode("admin"); toast("Entraste, pero no se pudo activar el guardado en GitHub");
@@ -2834,7 +2838,7 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(var(--c67)
 
   /* ---------- Sincronización con GitHub (rama main) ---------- */
   var GH_KEY = "bolis:gh:v1", ghSha = "", ghT = 0, ghBusy = false, ghDirty = false, ghTry = 0, ghState = "none";
-  var GH = {owner: "", repo: "", branch: "main", path: "bolis.json", token: ""};
+  var GH = {owner: "", repo: "", branch: "main", path: "bolis.json", token: "", src: ""};
   /* Copia duradera de la conexión: localStorage + IndexedDB, y se pide al navegador no borrarla */
   function ghIdb(op, val){
     return new Promise(function(res){
@@ -2855,7 +2859,7 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(var(--c67)
     });
   }
   function ghPersist(){
-    var cfg = {owner: GH.owner, repo: GH.repo, token: GH.token};
+    var cfg = {owner: GH.owner, repo: GH.repo, token: GH.token, src: GH.token ? (GH.src || "manual") : ""};
     try{ localStorage.setItem(GH_KEY, JSON.stringify(cfg)); }catch(e){}
     ghIdb("set", cfg);
     try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
@@ -2871,6 +2875,7 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(var(--c67)
     try{
       var sv = JSON.parse(localStorage.getItem(GH_KEY) || "null");
       if(sv) ["owner", "repo", "token"].forEach(function(k){ if(sv[k]) GH[k] = sv[k]; });
+      if(sv.token) GH.src = sv.src || "manual";   /* tokens guardados antes de este cambio cuentan como manuales */
     }catch(e){}
   }
   function ghFill(){
@@ -2920,7 +2925,10 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(var(--c67)
     try{ var d = JSON.parse(text); return !(d.items && d.items.length) && !(d.pending && d.pending.length) && !(d.sales && d.sales.length); }
     catch(e){ return false; }
   }
+  var lastRemote = "";
   function adoptRemote(text){
+    if(text === lastRemote) return "same";
+    lastRemote = text;
     try{ var d0 = JSON.parse(text); if(d0 && d0.acceso && d0.acceso.data) accessBlob = d0.acceso; }catch(e){}
     if(remoteIsEmpty(text) && (items.length || pending.length || sales.length)) return "local";
     var keep = cart; applyData(text); cart = keep; saveLocal(); render();
@@ -2961,7 +2969,7 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(var(--c67)
       }
       var res = adoptRemote(text);
       if(tokErr) ghStatus("Datos cargados, pero el token no funciona (" + tokErr + "). Vuelve a poner la palabra de acceso o un token nuevo.");
-      else ghStatus(res === "remote" ? "Datos cargados desde GitHub ✓" : "El archivo de GitHub está vacío: se subirá lo que hay en este dispositivo.", true);
+      else ghStatus(res === "local" ? "El archivo de GitHub está vacío: se subirá lo que hay en este dispositivo." : "Datos al día con GitHub ✓", true);
       if(res === "local" && useTok) ghQueueSave();
       if(manual) toast("Datos actualizados desde GitHub");
     }).catch(function(e){ ghStatus("No se pudo cargar desde GitHub (" + e.message + ")."); });
@@ -2982,7 +2990,7 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(var(--c67)
     var body = {message: "Actualiza inventario " + new Date().toISOString(), content: b64enc(payload()), branch: GH.branch};
     if(ghSha) body.sha = ghSha;
     ghApi("PUT", body).then(function(r){
-      if(r.ok) return r.json().then(function(j){ ghSha = j.content.sha; ghTry = 0; ghState = "ok"; ghStatus("Guardado en GitHub (" + GH.branch + ") ✓", true); });
+      if(r.ok) return r.json().then(function(j){ lastRemote = b64dec(body.content); ghSha = j.content.sha; ghTry = 0; ghState = "ok"; ghStatus("Guardado en GitHub (" + GH.branch + ") ✓", true); });
       if(r.status === 409 || r.status === 422){
         return ghApi("GET").then(function(g){
           if(g.status === 404){ ghSha = ""; ghDirty = true; ghT = setTimeout(ghPush, 300); return; }
@@ -3060,13 +3068,15 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(var(--c67)
   $("ghSave").onclick = function(){
     var o = $("ghOwner").value.trim(), r = $("ghRepo").value.trim(), t = $("ghToken").value.trim() || GH.token;
     if(!o || !r){ ghStatus("Escribe el usuario y el repositorio."); return; }
+    var typed = $("ghToken").value.trim();
     GH.owner = o; GH.repo = r; GH.token = t;
+    if(typed) GH.src = "manual"; else if(t && !GH.src) GH.src = "manual";
     ghPersist();
     ghFill(); ghLoad(true); render();
   };
   $("ghLoad").onclick = function(){ ghLoad(true); };
   $("ghForget").onclick = function(){
-    GH.token = ""; ghPersist();
+    GH.token = ""; GH.src = ""; ghPersist();
     ghFill(); ghStatus("Token eliminado de este dispositivo."); render();
   };
 
@@ -3084,11 +3094,11 @@ body .hero .stext .tagline::after,body .rule{box-shadow:0 0 12px rgba(var(--c67)
   $("hLogo").src = document.querySelector(".logo").src;
   ghInit(); ghFill();
   try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
-  if(GH.token){ ghIdb("set", {owner: GH.owner, repo: GH.repo, token: GH.token}); }
+  if(GH.token){ ghIdb("set", {owner: GH.owner, repo: GH.repo, token: GH.token, src: GH.src || "manual"}); }
   else ghIdb("get").then(function(cfg){
     if(!cfg || !cfg.token || GH.token) return;
-    GH.token = cfg.token; GH.owner = GH.owner || cfg.owner || ""; GH.repo = GH.repo || cfg.repo || "";
-    try{ localStorage.setItem(GH_KEY, JSON.stringify({owner: GH.owner, repo: GH.repo, token: GH.token})); }catch(e){}
+    GH.token = cfg.token; GH.src = cfg.src || "manual"; GH.owner = GH.owner || cfg.owner || ""; GH.repo = GH.repo || cfg.repo || "";
+    try{ localStorage.setItem(GH_KEY, JSON.stringify({owner: GH.owner, repo: GH.repo, token: GH.token, src: GH.src})); }catch(e){}
     ghFill(); updateSync(); loadView(false);
   });
   load(); setMode("home"); restoreHandle();
@@ -3363,57 +3373,65 @@ document.addEventListener("visibilitychange", function(){ document.body.classLis
 })();
 </script>
 <script id="white-float">
-/* Orbes y burbujas blancas que flotan: suben despacio, se balancean y pulsan */
+/* Olas de luz que se abren: resolución completa, brillo suave, calidad adaptable solo si el equipo va justo */
 (function(){
   if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   var c=document.createElement("canvas"); c.id="fx3"; c.setAttribute("aria-hidden","true");
   c.style.cssText="position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none";
   var ref=document.getElementById("fx2")||document.getElementById("fx");
   if(ref&&ref.parentNode) ref.parentNode.insertBefore(c,ref.nextSibling); else document.body.appendChild(c);
-  var g=c.getContext("2d"),W=0,H=0,P=[],raf=0,rt=0;
-  /* sprite del orbe: núcleo blanco con halo suave */
-  var orb=document.createElement("canvas"); orb.width=orb.height=64;
-  (function(){var o=orb.getContext("2d"),h=o.createRadialGradient(32,32,0,32,32,32);
-    h.addColorStop(0,"rgba(255,255,255,1)");h.addColorStop(.25,"rgba(255,255,255,.55)");h.addColorStop(1,"rgba(255,255,255,0)");
-    o.fillStyle=h;o.fillRect(0,0,64,64);})();
-  function size(){var d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;c.width=W*d;c.height=H*d;g.setTransform(d,0,0,d,0,0);}
-  function mk(y,x0){
-    var ring=Math.random()<.4;
-    return{x:x0!==undefined?x0:Math.random()*W,y:y!==undefined?y:Math.random()*H,
-      r:ring?6+Math.random()*8:5+Math.random()*8,ring:ring,
-      vy:.12+Math.random()*.3,sw:10+Math.random()*26,sf:.25+Math.random()*.5,
-      ph:Math.random()*6.28,pf:.5+Math.random()*.9,a:.45+Math.random()*.5};
+  var g=c.getContext("2d",{alpha:true}),W=0,H=0,raf=0,rt=0,last=0,q=1,slow=0,gap=0,mob=false;
+  var FANS=[
+    {side:0,y:.74,open:.46,amp:.050,fr:1.5,sp:.11,ph:0,   n:26,a:.40},
+    {side:1,y:.30,open:.40,amp:.042,fr:1.9,sp:.09,ph:2.1, n:22,a:.30},
+    {side:0,y:.38,open:.32,amp:.036,fr:2.3,sp:.13,ph:4.0, n:18,a:.22},
+    {side:1,y:.84,open:.36,amp:.046,fr:1.3,sp:.08,ph:5.3, n:20,a:.28}
+  ];
+  function size(){
+    var d=Math.min(devicePixelRatio||1,2);
+    W=innerWidth; H=innerHeight; mob=W<700;
+    c.width=Math.round(W*d); c.height=Math.round(H*d);
+    g.setTransform(d,0,0,d,0,0);
+    g.globalCompositeOperation="lighter"; g.strokeStyle="rgb(255,244,222)"; g.lineJoin="round";
   }
-  function init(){size();var n=W<700?8:14,xs=[];for(var k=0;k<n;k++)xs.push(((k+.5)/n+(Math.random()-.5)*.5/n)*W);
-    xs.sort(function(){return Math.random()-.5;});P=[];for(var i=0;i<n;i++)P.push(mk(undefined,xs[i]));}
-  var last=0;
-  function loop(ts){
-    raf=0; var dt=Math.min(50,ts-last||16); last=ts; var T=ts/1000;
-    g.clearRect(0,0,W,H);
-    for(var i=0;i<P.length;i++){var p=P[i];
-      p.y-=p.vy*dt*.1;           /* sube */
-      if(p.y<-40){P[i]=p=mk(H+40,p.x);}
-      var x=p.x+Math.sin(T*p.sf*.5+p.ph)*p.sw;
-      var y=p.y+Math.sin(T*p.sf*.65+p.ph)*8;
-      var pulse=.65+.35*Math.sin(T*p.pf*.5+p.ph);
-      var edge=Math.min(1,Math.max(0,Math.min(y+30,H-y+30)/90));
-      var al=p.a*pulse*edge;
-      if(p.ring){
-        g.globalAlpha=al*.9;g.lineWidth=1.4;g.strokeStyle="#fff";
-        g.beginPath();g.arc(x,y,p.r,0,6.2832);g.stroke();
-        g.globalAlpha=al*.18;g.fillStyle="#fff";g.beginPath();g.arc(x,y,p.r,0,6.2832);g.fill();
-        g.globalAlpha=al;g.beginPath();g.arc(x-p.r*.35,y-p.r*.35,Math.max(1.2,p.r*.14),0,6.2832);g.fill();
-      }else{
-        var s=p.r*(.9+.3*pulse);
-        g.globalAlpha=al;g.drawImage(orb,x-s*1.3,y-s*1.3,s*2.6,s*2.6);
+  function fan(f,T){
+    var n=Math.max(8,Math.round((mob?f.n*.6:f.n)*q)), step=q<1?14:10, dir=f.side?-1:1;
+    var x0=f.side?W:0, by=H*f.y;
+    var breath=.72+.28*Math.sin(T*.16+f.ph), spread=H*f.open*breath, amp=H*f.amp;
+    for(var k=0;k<n;k++){
+      var u=k/(n-1), v=u-.5, edge=1-Math.abs(v)*1.15;
+      var al=f.a*Math.max(.12,edge)*(.55+.45*Math.sin(T*.3+u*3+f.ph));
+      g.beginPath();
+      for(var s=0;s<=W+step;s+=step){
+        var p=s>W?1:s/W, open=Math.pow(p,1.35), x=x0+dir*s;
+        var y=by+v*spread*2*open
+          +Math.sin(p*f.fr*6.283+T*f.sp*6.283+f.ph+u*1.4)*amp*(.25+open)
+          +Math.sin(p*f.fr*3.1+T*f.sp*3+u*2.2)*amp*.35*open;
+        if(s===0) g.moveTo(x,y); else g.lineTo(x,y);
       }
+      var major=k%5===0;
+      if(major&&!mob){            /* brillo: pasada ancha y tenue en lugar de sombra difuminada (mucho más barato) */
+        g.globalAlpha=al*.22; g.lineWidth=5; g.stroke();
+      }
+      g.globalAlpha=al; g.lineWidth=major?1.5:.8; g.stroke();
     }
-    g.globalAlpha=1;
+  }
+  function loop(ts){
+    raf=0;
+    if(ts-last>=gap){
+      last=ts; var t0=performance.now(), T=ts/1000;
+      g.clearRect(0,0,W,H);
+      for(var i=0;i<FANS.length;i++) fan(FANS[i],T);
+      g.globalAlpha=1;
+      var cost=performance.now()-t0;
+      /* solo si de verdad va lento (más de ~12 ms por cuadro de forma sostenida) */
+      if(cost>12){ if(++slow>45){ slow=0; if(q>.6) q=.6; else if(gap<33) gap=33; } } else if(slow>0) slow--;
+    }
     if(!document.hidden) raf=requestAnimationFrame(loop);
   }
-  addEventListener("resize",function(){clearTimeout(rt);rt=setTimeout(init,200);});
+  addEventListener("resize",function(){clearTimeout(rt);rt=setTimeout(size,200);});
   document.addEventListener("visibilitychange",function(){if(!document.hidden&&!raf){last=0;raf=requestAnimationFrame(loop);}});
-  init(); raf=requestAnimationFrame(loop);
+  size(); raf=requestAnimationFrame(loop);
 })();
 </script>
 <style id="pend-fix">
@@ -3902,5 +3920,117 @@ body[data-mode="admin"] #list li.glass::after{display:none !important}
   render();
 })();
 </script>
+<style id="admin-boli">
+/* ---------- Administrador: lista con la misma estética que la de Bolis (boli con palito) ---------- */
+body[data-mode="admin"] #viewAdmin #list li.glass.t-agua{--ring:rgb(var(--c127))}
+body[data-mode="admin"] #viewAdmin #list li.glass.t-leche{--ring:rgb(var(--c128))}
+
+/* etiquetas de tipo y existencias: texto discreto como en Bolis */
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .tbar,
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .sbar{
+  position:relative;display:inline-flex;align-items:center;width:auto !important;height:auto !important;min-height:0 !important;min-width:0 !important;
+  margin:0;padding:0 0 0 14px !important;border:0 !important;border-radius:0 !important;background:none !important;box-shadow:none !important;
+  font-size:.62rem;font-weight:500;letter-spacing:.22em;text-transform:uppercase;line-height:1.2;white-space:nowrap;color:rgb(var(--c131))}
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .tbar::before,
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .sbar::before{
+  content:"";position:absolute;left:0;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50% !important;box-shadow:none}
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .tbar::before{background:var(--ring)}
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .tbar:hover{color:#fff}
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .sbar{color:rgb(var(--c132))}
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .sbar.s-low{color:#d9917c}
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .sbar.zero{color:rgb(var(--c52))}
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .bars{gap:18px}
+
+/* controles: mismos botones redondos que el cliente; agregar al carrito en oro */
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .ctrl{background:none !important;border:0 !important;padding:0;gap:4px}
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .ctrl button{width:40px;height:40px;
+  background:rgba(255,255,255,.07) !important;border:1px solid rgba(var(--c129),.28) !important;color:rgb(var(--c55))}
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .ctrl button:hover{background:rgba(255,255,255,.14) !important;border-color:rgba(var(--c129),.5) !important;color:#fff}
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .ctrl input{color:rgb(var(--c95));font-weight:600;font-size:.95rem}
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .cartbtn{width:44px;height:44px;margin:0;border:0 !important;color:rgb(var(--c101));
+  background:linear-gradient(135deg,rgb(var(--c99)),rgb(var(--c100))) !important;box-shadow:none !important}
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .cartbtn:not(:disabled):hover{filter:brightness(1.08);color:rgb(var(--c101));
+  background:linear-gradient(135deg,rgb(var(--c99)),rgb(var(--c100))) !important}
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .cartbtn:disabled{background:rgba(255,255,255,.07) !important;color:rgb(var(--c48));filter:none}
+body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .del{color:rgb(var(--c74))}
+
+@media (min-width:701px){
+  body[data-mode="admin"] #viewAdmin #list{grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr)) !important;
+    column-gap:44px !important;row-gap:48px !important;padding:6px 0 64px !important}
+  body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty){
+    position:relative;display:grid !important;
+    grid-template-columns:auto minmax(0,1fr) auto auto auto !important;
+    grid-template-areas:"bar name ctrl cart del" "bar bars ctrl cart del" !important;
+    align-items:center;column-gap:20px !important;row-gap:6px !important;
+    min-height:150px !important;margin-right:26px !important;
+    padding:34px 36px 34px clamp(44px,4vw,60px) !important;
+    border:0 !important;border-radius:68px 26px 26px 68px !important;box-shadow:none !important;transform:none !important;
+    background:linear-gradient(105deg,rgba(var(--c5),.16) 0,rgba(var(--c5),0) 50%),linear-gradient(180deg,rgb(var(--c111)),rgb(var(--c77))) !important;
+    transition:transform .8s var(--ease)}
+  body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty):hover{transform:translateY(-2px) !important;border:0 !important}
+  /* barra de tipo */
+  body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty)::before{
+    content:"" !important;display:block !important;position:static;grid-area:bar;width:8px;height:62px;border:0 !important;border-radius:6px !important;
+    background:linear-gradient(180deg,rgb(var(--c141)),var(--ring))}
+  body[data-mode="admin"] #viewAdmin #list li.glass.t-leche:not(.empty)::before{background:linear-gradient(180deg,rgb(var(--c142)),rgb(var(--c138)))}
+  /* palito de madera */
+  body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty)::after{
+    content:"" !important;display:block !important;position:absolute;right:-26px;left:auto;top:50%;bottom:auto;width:26px !important;height:34% !important;min-height:26px;max-height:40px;
+    transform:translateY(-50%);border:0 !important;border-radius:0 18px 18px 0 !important;pointer-events:none;
+    background:linear-gradient(90deg,rgba(var(--c14),.6) 0,rgba(var(--c14),0) 26%),
+      repeating-linear-gradient(0deg,rgba(var(--c81),.16) 0 1px,transparent 1px 6px),
+      linear-gradient(90deg,rgb(var(--c112)),rgb(var(--c113)) 55%,rgb(var(--c114))) !important;
+    box-shadow:inset 0 0 0 1px rgba(var(--c83),.35) !important;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));transition:transform .8s var(--ease)}
+  body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty):hover::after{transform:translateY(-50%) translateX(5px)}
+  body[data-mode="admin"] #viewAdmin #list li.glass.out:not(.empty)::before,
+  body[data-mode="admin"] #viewAdmin #list li.glass.out:not(.empty)::after{filter:grayscale(1) brightness(.7);opacity:.7}
+  body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .fname{font-size:1.6rem;font-weight:600;line-height:1.12;color:rgb(var(--c95))}
+  body[data-mode="admin"] #viewAdmin #list li.glass > .cimgw{display:none !important}
+}
+@media (max-width:700px){
+  body[data-mode="admin"] #viewAdmin #list{row-gap:34px !important;padding:6px 0 64px !important}
+  body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty){
+    display:grid !important;grid-template-columns:minmax(0,1fr) auto auto auto !important;
+    grid-template-areas:"img img img img" "name name name name" "bars bars bars bars" "ctrl . cart del" !important;
+    align-items:center;column-gap:12px !important;row-gap:10px !important;margin-right:0 !important;
+    padding:14px 14px 20px !important;border:0 !important;border-radius:16px !important;box-shadow:none !important;transform:none !important;
+    background:linear-gradient(180deg,rgba(var(--c5),.12) 0,rgba(var(--c5),0) 40%),rgb(var(--c115)) !important}
+  body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty)::before,
+  body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty)::after{display:none !important}
+  body[data-mode="admin"] #viewAdmin #list li.glass > .cimgw{grid-area:img;margin:0 0 6px !important;order:0}
+  body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .fname{font-size:1.4rem;font-weight:700;line-height:1.1;color:rgb(var(--c95));padding:0 6px}
+  body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .bars{padding:0 6px}
+  body[data-mode="admin"] #viewAdmin #list li.glass:not(.empty) .ctrl{padding:0 0 0 6px}
+}
+</style>
+<style id="home-circles">
+/* ---------- Inicio: cada sección sobre un círculo negro ---------- */
+body .home .door:is(.door-user,.door-shakes,.door-promo){
+  aspect-ratio:1/1;min-height:0 !important;height:auto;border-radius:50% !important;overflow:hidden;
+  justify-content:center !important;align-items:center;text-align:center;
+  padding:clamp(16px,3vw,34px) clamp(18px,3.6vw,44px) !important;gap:clamp(4px,1vw,12px);
+  background:rgb(var(--c116)) !important;background-image:none !important;
+  box-shadow:inset 0 0 0 1px rgba(var(--c75),.30),0 22px 54px rgba(0,0,0,.75) !important;
+  transition:box-shadow .7s ease,transform .8s var(--ease)}
+body .home .door:is(.door-user,.door-shakes,.door-promo):hover{
+  box-shadow:inset 0 0 0 1px rgba(var(--c75),.7),0 0 38px rgba(var(--c75),.22),0 22px 54px rgba(0,0,0,.75) !important}
+body .home .door:is(.door-user,.door-shakes,.door-promo) .di{width:clamp(40px,7vw,78px);height:clamp(40px,7vw,78px);margin:0}
+body .home .door:is(.door-user,.door-shakes,.door-promo) b{margin:clamp(2px,.6vw,8px) 0 0 !important}
+body .home .door:is(.door-user,.door-shakes,.door-promo) .dsub{max-width:19ch}
+body .home .door:is(.door-user,.door-shakes,.door-promo) .dgo{margin:clamp(2px,.6vw,8px) 0 0}
+@media (max-width:960px) and (min-width:761px){
+  body .home .door:is(.door-user,.door-shakes,.door-promo) .dsub{font-size:.58rem}
+  body .home .door:is(.door-user,.door-shakes,.door-promo) .dgo{display:none}
+}
+@media (max-width:760px){
+  body .home .door:is(.door-user,.door-shakes,.door-promo){
+    width:min(74%,300px) !important;padding:16px 13% !important;border-radius:50% !important;
+    box-shadow:inset 0 0 0 1px rgba(var(--c75),.30),0 18px 40px rgba(0,0,0,.7) !important}
+  body .home .door:is(.door-user,.door-shakes,.door-promo) .di{width:48px;height:48px}
+  body .home .door:is(.door-user,.door-shakes,.door-promo) b{font-size:1.05rem !important}
+  body .home .door:is(.door-user,.door-shakes,.door-promo) .dsub{font-size:.74rem;max-width:20ch}
+  body .home .door:is(.door-user,.door-shakes,.door-promo) .dgo{margin-top:4px;font-size:.54rem}
+}
+</style>
 </body>
 </html>
