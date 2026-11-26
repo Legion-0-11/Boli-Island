@@ -14,7 +14,7 @@
     },
     {
       "name": "Capuccino",
-      "qty": 0,
+      "qty": 1,
       "type": "leche"
     },
     {
@@ -193,5 +193,12 @@
       "extra": 305,
       "total": 305
     }
-  ]
+  ],
+  "acceso": {
+    "v": 1,
+    "it": 600000,
+    "salt": "WNrI4JfKv/pGw5npfDYL4w==",
+    "iv": "tVr8pHHBKz3OQtoE",
+    "data": "gNYFgh6HD2UOdvRqPC8huNZS0tiQvHswGSzP+NZFcub2VbAFmNqCmf2g/Veeyo92Eo4GzJQvDslAFauPTvam/9erRPJp0hVgEHLRGnmnqVufb08CT8S9miXxK2cZJnW5FggM6MUkrdflQKB29zbiL+Y9iKtDDDu2WxIcXcDGzD1XNp/UdGA1tQSM4WtLX02HMG4uDsD/rXzL"
+  }
 }
